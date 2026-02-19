@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Skyline Cup</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:       #c0392b;
+    --red-dark:  #96281b;
+    --red-light: #e74c3c;
+    --cream:     #f9f3e8;
+    --gold:      #d4a843;
+    --gold-light:#f0c957;
+    --brown:     #6b3a2a;
+    --tan:       #e8d5b0;
+    --green:     #1a4a2e;
+    --dark:      #1a0a06;
+    --white:     #fdf8f0;
+    --muted:     #9a7060;
+    --card:      rgba(253,248,240,0.96);
+    --shadow:    0 6px 32px rgba(26,10,6,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Crimson Pro', serif;
+    background: var(--dark);
+    color: var(--dark);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 10% 0%, rgba(192,57,43,0.35) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 100%, rgba(212,168,67,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(107,58,42,0.2) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Chili dot pattern overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(212,168,67,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-bg {
+    background: linear-gradient(180deg, #2a0c08 0%, #1a0a06 60%, transparent 100%);
+    padding: 24px 20px 0;
+    position: relative;
+  }
+
+  .chili-banner {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    object-position: center 60%;
+    display: block;
+    opacity: 0.75;
+    filter: saturate(1.3) contrast(1.1);
+  }
+
+  .chili-banner-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: linear-gradient(transparent, #1a0a06);
+  }
+
+  .logo-area {
+    text-align: center;
+    padding-bottom: 4px;
+  }
+
+  .trophy-icon { font-size: 36px; margin-bottom: 4px; display: block; }
+
+  .header-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.8;
+  }
+
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 2px;
+    color: var(--cream);
+    line-height: 0.95;
+    margin: 2px 0;
+  }
+  .header-title span { color: var(--red-light); }
+
+  .header-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .header-chili-quote {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(212,168,67,0.7);
+    margin-top: 8px;
+    padding-bottom: 16px;
+  }
+
+  .team-banner {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px 20px 16px;
+  }
+  .team-badge {
+    padding: 5px 18px;
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .team-east { background: var(--red); color: var(--cream); }
+  .team-west { background: var(--gold); color: var(--dark); }
+
+  /* ===== NAV ===== */
+  .nav {
+    display: flex;
+    background: rgba(26,10,6,0.85);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(212,168,67,0.25);
+    border-bottom: 1px solid rgba(212,168,67,0.12);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex: 1;
+    min-width: 60px;
+    padding: 11px 4px 9px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-btn .icon { font-size: 17px; }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--red); }
+  .nav-btn:hover:not(.active) { color: var(--cream); }
+
+  /* ===== CONTENT ===== */
+  .content { flex: 1; padding: 14px; overflow-y: auto; }
+  .page { display: none; animation: fadeIn 0.3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(212,168,67,0.12);
+  }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: var(--red-dark);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    background: var(--red-dark);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ===== SETUP PAGE ===== */
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .player-row:last-child { border-bottom: none; }
+  .player-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+  }
+  .avatar-east { background: var(--red); color: var(--cream); }
+  .avatar-west { background: var(--gold); color: var(--dark); }
+  .player-info { flex: 1; min-width: 0; }
+  .player-name-input {
+    width: 100%; border: none; background: none;
+    font-family: 'Crimson Pro', serif; font-size: 16px; font-weight: 600;
+    color: var(--dark); outline: none;
+  }
+  .player-name-input::placeholder { color: var(--muted); font-style: italic; }
+  .player-hdcp { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .player-hdcp label { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .hdcp-input {
+    width: 48px; border: 1px solid #ddd; border-radius: 6px;
+    padding: 2px 6px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--dark); text-align: center;
+  }
+  .team-tag {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    padding: 3px 10px; border-radius: 10px; text-transform: uppercase;
+    letter-spacing: 1px; border: none; cursor: pointer;
+  }
+  .save-btn {
+    width: 100%; padding: 14px; background: var(--red);
+    color: var(--cream); border: none; border-radius: 12px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    letter-spacing: 2px; cursor: pointer; margin-top: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(192,57,43,0.4);
+  }
+  .save-btn:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+  /* ===== SCORECARD ===== */
+  .round-selector {
+    display: flex; gap: 8px; margin-bottom: 12px;
+    overflow-x: auto; scrollbar-width: none; padding-bottom: 4px;
+  }
+  .round-selector::-webkit-scrollbar { display: none; }
+  .round-btn {
+    flex-shrink: 0; padding: 7px 16px; border-radius: 20px;
+    border: 1.5px solid var(--red); background: none;
+    color: var(--cream); font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .round-btn.active { background: var(--red); color: var(--cream); border-color: var(--red); }
+
+  .scorecard-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .scorecard-table th {
+    background: var(--red-dark); color: var(--gold);
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    letter-spacing: 1px; padding: 8px 4px; text-align: center;
+  }
+  .scorecard-table th:first-child { text-align: left; padding-left: 8px; border-radius: 8px 0 0 0; }
+  .scorecard-table th:last-child { border-radius: 0 8px 0 0; }
+  .scorecard-table td {
+    padding: 5px 4px; text-align: center;
+    border-bottom: 1px solid rgba(0,0,0,0.06); vertical-align: middle;
+  }
+  .scorecard-table td:first-child {
+    text-align: left; padding-left: 8px;
+    font-weight: 600; font-size: 11px; color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .scorecard-table tr.par-row td { background: rgba(192,57,43,0.07); font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--red-dark); font-size: 11px; }
+  .scorecard-table tr.total-row td { background: rgba(192,57,43,0.13); font-weight: 700; font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+  .score-cell {
+    width: 34px; height: 28px; border: 1px solid #ddd; border-radius: 5px;
+    text-align: center; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--dark); background: white; outline: none;
+    display: block; margin: 0 auto; padding: 0;
+  }
+  .score-cell:focus { border-color: var(--red); }
+  .eagle  { background: #ffd700 !important; color: #333 !important; border-color: #cc9900 !important; }
+  .birdie { background: #e74c3c !important; color: white !important; border-color: #c0392b !important; }
+  .par-score { background: white !important; }
+  .bogey { background: #fde8e8 !important; }
+  .double { background: #f5d5d5 !important; }
+  .triple-plus { background: #ecc0c0 !important; }
+
+  /* ===== LEADERBOARD ===== */
+  .sub-tabs {
+    display: flex; gap: 0; background: rgba(0,0,0,0.12);
+    border-radius: 10px; padding: 3px; margin-bottom: 12px;
+  }
+  .sub-tab {
+    flex: 1; padding: 7px 4px; border: none; background: none;
+    border-radius: 8px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 0.5px; cursor: pointer;
+    color: var(--muted); transition: all 0.2s; text-transform: uppercase;
+  }
+  .sub-tab.active { background: var(--red); color: var(--cream); font-weight: 600; box-shadow: 0 1px 6px rgba(192,57,43,0.4); }
+
+  .leaderboard-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .leaderboard-item:last-child { border-bottom: none; }
+  .rank {
+    font-family: 'Bebas Neue', sans-serif; font-size: 24px;
+    color: var(--muted); width: 28px; text-align: center;
+  }
+  .rank.first  { color: var(--gold); }
+  .rank.second { color: #a8a8a8; }
+  .rank.third  { color: #c0845c; }
+  .lb-info { flex: 1; }
+  .lb-name   { font-weight: 700; font-size: 16px; font-family: 'Crimson Pro', serif; }
+  .lb-detail { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .lb-score  { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 600; }
+  .score-under { color: var(--red); }
+  .score-over  { color: var(--green); }
+
+  /* ===== TEAMS ===== */
+  .matchup-card {
+    background: linear-gradient(135deg, #2a0c08 0%, #3d1810 100%);
+    border-radius: 16px; padding: 18px; margin-bottom: 12px;
+    color: white; position: relative; overflow: hidden;
+    border: 1px solid rgba(212,168,67,0.2);
+  }
+  .matchup-card::after {
+    content: '🏆';
+    position: absolute; right: -8px; top: -8px;
+    font-size: 60px; opacity: 0.08; transform: rotate(15deg);
+  }
+  .matchup-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 14px;
+  }
+  .match-teams { display: flex; align-items: center; gap: 10px; }
+  .match-team { flex: 1; text-align: center; }
+  .match-team-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
+  .match-team-players { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; }
+  .match-score-display { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--gold); text-align: center; line-height: 1; }
+  .match-status { text-align: center; margin-top: 12px; }
+  .status-pill {
+    display: inline-block; padding: 4px 16px; border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1px;
+    background: rgba(212,168,67,0.15); border: 1px solid rgba(212,168,67,0.3); color: var(--gold);
+    text-transform: uppercase;
+  }
+  .weekend-stat {
+    display: flex; justify-content: space-between; padding: 9px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.07); font-size: 15px;
+  }
+  .weekend-stat:last-child { border-bottom: none; }
+  .weekend-stat-label { color: var(--muted); }
+  .weekend-stat-value { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+  /* ===== SKINS ===== */
+  .skins-hole {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .hole-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); width: 46px; }
+  .skin-winner { flex: 1; font-size: 14px; font-weight: 600; }
+  .skin-value {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--gold); background: var(--red-dark); padding: 2px 10px; border-radius: 10px;
+  }
+  .skin-carryover { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--red); font-style: italic; }
+  .skin-value-input {
+    width: 70px; border: 1px solid #ddd; border-radius: 8px;
+    padding: 6px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: center;
+  }
+
+  /* ===== STABLEFORD ===== */
+  .stableford-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .stableford-points { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--red-dark); width: 44px; text-align: right; }
+  .pts-label { font-size: 9px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+
+  /* ===== ITINERARY ===== */
+  .day-circle {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--red); color: var(--cream);
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .day-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--red-dark); letter-spacing: 0.5px; }
+  .day-label { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .itinerary-event {
+    display: flex; gap: 12px; padding: 7px 0;
+    border-left: 2px solid rgba(192,57,43,0.3);
+    padding-left: 14px; margin-left: 8px; position: relative;
+  }
+  .itinerary-event::before {
+    content: ''; position: absolute; left: -5px; top: 11px;
+    width: 8px; height: 8px; border-radius: 50%; background: rgba(192,57,43,0.4);
+  }
+  .itinerary-event.golf-event::before { background: var(--gold); }
+  .event-time { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); width: 40px; flex-shrink: 0; padding-top: 2px; }
+  .event-text { font-size: 14px; line-height: 1.4; }
+  .event-text strong { font-weight: 700; color: var(--dark); }
+  .event-text span { color: var(--muted); font-size: 12px; }
+  .course-info-box {
+    background: rgba(192,57,43,0.05); border: 1px solid rgba(192,57,43,0.15);
+    border-radius: 10px; padding: 12px; margin-top: 10px;
+  }
+  .course-stat { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 13px; }
+  .course-stat-label { color: var(--muted); font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .course-stat-value { font-weight: 700; color: var(--red-dark); }
+
+  /* ===== CHILI CARD ===== */
+  .chili-card {
+    background: linear-gradient(135deg, #2a0c08 0%, #1a0a06 100%);
+    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(212,168,67,0.2);
+    box-shadow: 0 4px 20px rgba(192,57,43,0.3);
+  }
+  .chili-card-img {
+    width: 100%; height: 130px; object-fit: cover;
+    border-radius: 10px; margin-bottom: 12px;
+    filter: saturate(1.2) contrast(1.05);
+  }
+  .chili-fact {
+    font-family: 'Crimson Pro', serif; font-style: italic;
+    font-size: 15px; color: var(--tan); line-height: 1.5;
+    text-align: center;
+  }
+  .chili-fact-author {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--gold); text-align: center; margin-top: 6px; letter-spacing: 1px;
+  }
+
+  /* ===== LEAGUE HISTORY ===== */
+  .history-header {
+    background: linear-gradient(135deg, #2a0c08, #3d1810);
+    border-radius: 14px; padding: 18px; margin-bottom: 12px;
+    border: 1px solid rgba(212,168,67,0.2);
+  }
+  .history-cup-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 32px;
+    letter-spacing: 2px; color: var(--gold); text-align: center; line-height: 1;
+  }
+  .history-cup-sub {
+    font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+    color: rgba(212,168,67,0.5); text-align: center; letter-spacing: 2px;
+    text-transform: uppercase; margin-top: 4px;
+  }
+  .stat-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;
+  }
+  .stat-box {
+    background: rgba(212,168,67,0.08); border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 10px; padding: 10px; text-align: center;
+  }
+  .stat-box-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); line-height: 1; }
+  .stat-box-label { font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: rgba(212,168,67,0.6); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  .year-card {
+    background: var(--card); border-radius: 12px; margin-bottom: 10px;
+    border: 1px solid rgba(212,168,67,0.1); overflow: hidden;
+    box-shadow: 0 2px 12px rgba(26,10,6,0.1);
+  }
+  .year-header {
+    background: var(--red-dark); padding: 10px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+  }
+  .year-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: var(--cream); }
+  .year-champion { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--gold); }
+  .year-toggle { color: var(--gold); font-size: 16px; transition: transform 0.2s; }
+  .year-toggle.open { transform: rotate(180deg); }
+  .year-body { display: none; padding: 14px; }
+  .year-body.open { display: block; }
+  .year-stat-row {
+    display: flex; justify-content: space-between; padding: 7px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 14px;
+  }
+  .year-stat-row:last-child { border-bottom: none; }
+  .year-stat-key { color: var(--muted); font-size: 12px; }
+  .year-stat-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--red-dark); }
+
+  .records-section { margin-top: 4px; }
+  .record-item {
+    display: flex; gap: 10px; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .record-item:last-child { border-bottom: none; }
+  .record-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+  .record-info { flex: 1; }
+  .record-label { font-size: 13px; font-weight: 600; }
+  .record-holder { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); }
+  .record-value { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--red); }
+
+  /* Trophy display */
+  .trophy-display {
+    background: linear-gradient(135deg, #d4a843, #f0c957, #d4a843);
+    border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 12px;
+    position: relative; overflow: hidden;
+  }
+  .trophy-display::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+  }
+  .trophy-emoji-big { font-size: 52px; display: block; }
+  .trophy-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--dark); margin-top: 6px; }
+  .trophy-tagline { font-family: 'Crimson Pro', serif; font-style: italic; font-size: 14px; color: rgba(26,10,6,0.65); margin-top: 4px; }
+
+  .add-year-btn {
+    width: 100%; padding: 12px; background: none;
+    border: 2px dashed rgba(212,168,67,0.4); border-radius: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1px;
+    color: var(--gold); cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .add-year-btn:hover { background: rgba(212,168,67,0.06); }
+
+  /* Input styles for history editing */
+  .hist-input {
+    border: none; background: none; font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: var(--red-dark); font-weight: 600; outline: none;
+    width: 100%; text-align: right;
+  }
+  .hist-input:focus { border-bottom: 1px solid var(--red); }
+
+  .empty-state { text-align: center; padding: 24px 20px; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; font-style: italic; }
+
+  .footer {
+    text-align: center; padding: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 8px;
+    color: rgba(255,255,255,0.15); letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  /* Chili pepper dividers */
+  .pepper-divider {
+    text-align: center; font-size: 14px; opacity: 0.4;
+    letter-spacing: 4px; margin: 6px 0 10px;
+  }
+
+  @media (min-width: 431px) {
+    .app { box-shadow: 0 0 80px rgba(0,0,0,0.6); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-bg" style="position:relative;">
+      <!-- Chili banner image -->
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Skyline_Chili_Cincinnati.jpg/640px-Skyline_Chili_Cincinnati.jpg"
+        class="chili-banner"
+        alt="Skyline Chili"
+        onerror="this.style.display='none'"
+      >
+      <div class="chili-banner-overlay"></div>
+      <div class="logo-area">
+        <span class="trophy-icon">🏆</span>
+        <div class="header-eyebrow">Est. 2019 · Cincinnati's Finest</div>
+        <div class="header-title">The <span>Skyline</span> Cup</div>
+        <div class="header-sub">Annual Golf Championship · 4 Players · 2 Teams</div>
+        <div class="header-chili-quote">"Where the fairways are green and the chili is on every hot dog."</div>
+      </div>
+    </div>
+    <div class="team-banner">
+      <span class="team-badge team-east" id="eastLabel">🌅 Team East</span>
+      <span class="team-badge team-west" id="westLabel">🌄 Team West</span>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('setup')" id="nav-setup">
+      <span class="icon">👤</span>Setup
+    </button>
+    <button class="nav-btn" onclick="showPage('scorecard')" id="nav-scorecard">
+      <span class="icon">📋</span>Scores
+    </button>
+    <button class="nav-btn" onclick="showPage('leaderboard')" id="nav-leaderboard">
+      <span class="icon">🏆</span>Board
+    </button>
+    <button class="nav-btn" onclick="showPage('teams')" id="nav-teams">
+      <span class="icon">🤝</span>Teams
+    </button>
+    <button class="nav-btn" onclick="showPage('itinerary')" id="nav-itinerary">
+      <span class="icon">🗓️</span>Schedule
+    </button>
+    <button class="nav-btn" onclick="showPage('history')" id="nav-history">
+      <span class="icon">📜</span>History
+    </button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ===== SETUP ===== -->
+    <div class="page active" id="page-setup">
+      <!-- Chili fun card -->
+      <div class="chili-card">
+        <div class="chili-fact">
+          "Skyline Chili: Cincinnati's most polarizing export — except for the guys who can't break 90."
+        </div>
+        <div class="chili-fact-author">— The Skyline Cup Rulebook, Article 1</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👤 Players & Handicaps</div>
+        <div id="players-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 Skins Format</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+          <span style="flex:1;font-size:15px;">Value per skin</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--muted);">$</span>
+          <input type="number" class="skin-value-input" id="skinValue" value="5" min="1">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);">
+          <span style="flex:1;font-size:15px;">Carry over ties?</span>
+          <input type="checkbox" id="carryoverCheck" checked style="width:18px;height:18px;accent-color:var(--red);">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Rounds</div>
+        <div id="rounds-list"></div>
+        <button onclick="addRound()" style="margin-top:10px;padding:8px 16px;border:1.5px dashed var(--red);background:none;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--red);cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:1px;">
+          + Add Round
+        </button>
+      </div>
+
+      <button class="save-btn" onclick="saveSetup()">🌶️ Save & Tee It Up</button>
+    </div>
+
+    <!-- ===== SCORECARD ===== -->
+    <div class="page" id="page-scorecard">
+      <div class="round-selector" id="round-selector"></div>
+      <div class="card" id="scorecard-area">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>Set up players and rounds first!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LEADERBOARD ===== -->
+    <div class="page" id="page-leaderboard">
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="showLbTab('stroke')">Stroke</button>
+        <button class="sub-tab" onclick="showLbTab('net')">Net</button>
+        <button class="sub-tab" onclick="showLbTab('stableford')">Stableford</button>
+        <button class="sub-tab" onclick="showLbTab('skins')">Skins</button>
+      </div>
+      <div id="lb-stroke" class="lb-tab">
+        <div class="card">
+          <div class="card-title">🏆 Stroke Play <span class="badge">Gross</span></div>
+          <div id="lb-stroke-list"></div>
+        </div>
+      </div>
+      <div id="lb-net" class="lb-tab" style="display:none;">
+        <div class="card">
+          <div class="card-title">📊 Net Scores <span class="badge">HDCP Adj.</span></div>
+          <div id="lb-net-list"></div>
+        </div>
+      </div>
+      <div id="lb-stableford" class="lb-tab" style="display:none;">
+        <div class="card">
+          <div class="card-title">⭐ Stableford</div>
+          <div id="lb-stableford-list"></div>
+        </div>
+        <div class="card" style="background:rgba(192,57,43,0.04);border:1px solid rgba(192,57,43,0.1);">
+          <div class="card-title" style="font-size:16px;">Scoring Key</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:2.2;">
+            🦅 Eagle: 4pts · 🐦 Birdie: 3pts · Par: 2pts<br>
+            Bogey: 1pt · Double+: 0pts
+          </div>
+        </div>
+      </div>
+      <div id="lb-skins" class="lb-tab" style="display:none;">
+        <div class="card">
+          <div class="card-title">💰 Skins by Hole</div>
+          <div id="lb-skins-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Skin Money</div>
+          <div id="skins-summary"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TEAMS ===== -->
+    <div class="page" id="page-teams">
+      <div id="team-matchup-area"></div>
+      <div class="card">
+        <div class="card-title">📅 Weekend Record</div>
+        <div id="weekend-record"></div>
+      </div>
+    </div>
+
+    <!-- ===== ITINERARY ===== -->
+    <div class="page" id="page-itinerary">
+      <!-- Chili section -->
+      <div class="chili-card">
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Cincinnati_chili.jpg/640px-Cincinnati_chili.jpg"
+          class="chili-card-img"
+          alt="Cincinnati Chili 3-Way"
+          onerror="this.style.display='none'"
+        >
+        <div class="chili-fact">"The 3-Way: spaghetti, chili, cheese. The holy trinity of Cincinnati. Second only to birdie, eagle, ace."</div>
+        <div class="chili-fact-author">— Skyline Cup Tradition Since Day One</div>
+      </div>
+      <div id="itinerary-content"></div>
+    </div>
+
+    <!-- ===== HISTORY ===== -->
+    <div class="page" id="page-history">
+
+      <!-- Trophy -->
+      <div class="trophy-display">
+        <span class="trophy-emoji-big">🏆</span>
+        <div class="trophy-name">The Skyline Cup</div>
+        <div class="trophy-tagline">Played for glory, bragging rights & a warm bowl of Cincinnati's finest</div>
+      </div>
+
+      <!-- Lifetime Stats -->
+      <div class="history-header">
+        <div class="history-cup-title">All-Time Stats</div>
+        <div class="history-cup-sub">Skyline Cup · League Records</div>
+        <div class="stat-grid" id="alltime-stats"></div>
+      </div>
+
+      <!-- Records -->
+      <div class="card">
+        <div class="card-title">🏅 All-Time Records</div>
+        <div id="records-list"></div>
+      </div>
+
+      <!-- Chili fun fact -->
+      <div class="chili-card">
+        <div class="chili-fact">"Just like Skyline Chili, the Skyline Cup was invented in Cincinnati, questioned by outsiders, and defended fiercely by those who've tasted victory."</div>
+        <div class="chili-fact-author">— Cup Lore</div>
+      </div>
+
+      <!-- Year by year -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cream);letter-spacing:1px;">Year by Year</div>
+      </div>
+
+      <button class="add-year-btn" onclick="addHistoryYear()">+ Add Year</button>
+
+      <div id="history-years"></div>
+
+      <div class="pepper-divider">🌶️ 🌶️ 🌶️</div>
+      <div style="text-align:center;font-family:'Crimson Pro',serif;font-style:italic;font-size:13px;color:rgba(212,168,67,0.4);padding-bottom:8px;">
+        "A 5-way, please. And yes, I know what I'm doing."
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <div class="footer">The Skyline Cup · Cincinnati's Most Prestigious Golf Event · 🌶️</div>
+</div>
+
+<script>
+// ===== STATE =====
+let state = {
+  players: [
+    { name: 'Player 1', handicap: 10, team: 'east' },
+    { name: 'Player 2', handicap: 15, team: 'east' },
+    { name: 'Player 3', handicap: 8,  team: 'west' },
+    { name: 'Player 4', handicap: 20, team: 'west' },
+  ],
+  rounds: [
+    { name: 'Round 1', course: 'Course 1', par: Array(18).fill(4) },
+    { name: 'Round 2', course: 'Course 2', par: Array(18).fill(4) },
+  ],
+  scores: {},
+  currentRound: 0,
+  skinValue: 5,
+  carryover: true,
+  history: [
+    {
+      year: 2024, location: 'Myrtle Beach, SC', champion: 'Team East', mvp: 'Player 1',
+      teamEastWins: 2, teamWestWins: 1, ties: 0,
+      lowGross: 78, lowGrossPlayer: 'Player 1',
+      lowNet: 68, lowNetPlayer: 'Player 2',
+      mostSkins: 4, mostSkinsPlayer: 'Player 1',
+      highStableford: 38, highStablefordPlayer: 'Player 3',
+      eaglesTotal: 1, birdiesTotal: 14, notes: 'Inaugural year. Player 2 famously 4-putted 18.'
+    },
+    {
+      year: 2023, location: 'Pinehurst, NC', champion: 'Team West', mvp: 'Player 4',
+      teamEastWins: 1, teamWestWins: 2, ties: 0,
+      lowGross: 81, lowGrossPlayer: 'Player 3',
+      lowNet: 70, lowNetPlayer: 'Player 4',
+      mostSkins: 5, mostSkinsPlayer: 'Player 4',
+      highStableford: 35, highStablefordPlayer: 'Player 4',
+      eaglesTotal: 0, birdiesTotal: 11, notes: 'West dominates. Cup leaves East for the first time.'
+    },
+    {
+      year: 2022, location: 'Scottsdale, AZ', champion: 'Team East', mvp: 'Player 2',
+      teamEastWins: 3, teamWestWins: 0, ties: 0,
+      lowGross: 79, lowGrossPlayer: 'Player 2',
+      lowNet: 67, lowNetPlayer: 'Player 2',
+      mostSkins: 6, mostSkinsPlayer: 'Player 2',
+      highStableford: 40, highStablefordPlayer: 'Player 2',
+      eaglesTotal: 2, birdiesTotal: 18, notes: 'Player 2 sweeps every category. Chili competition introduced.'
+    },
+    {
+      year: 2021, location: 'Bandon Dunes, OR', champion: 'Team West', mvp: 'Player 3',
+      teamEastWins: 1, teamWestWins: 2, ties: 1,
+      lowGross: 83, lowGrossPlayer: 'Player 3',
+      lowNet: 72, lowNetPlayer: 'Player 1',
+      mostSkins: 3, mostSkinsPlayer: 'Player 3',
+      highStableford: 32, highStablefordPlayer: 'Player 3',
+      eaglesTotal: 0, birdiesTotal: 9, notes: 'Wind at Bandon Dunes ruined everyone's scorecard but not their spirits.'
+    },
+    {
+      year: 2020, location: 'TPC Sawgrass, FL', champion: 'Team East', mvp: 'Player 1',
+      teamEastWins: 2, teamWestWins: 1, ties: 0,
+      lowGross: 80, lowGrossPlayer: 'Player 1',
+      lowNet: 69, lowNetPlayer: 'Player 1',
+      mostSkins: 5, mostSkinsPlayer: 'Player 1',
+      highStableford: 36, highStablefordPlayer: 'Player 1',
+      eaglesTotal: 1, birdiesTotal: 13, notes: 'COVID year — small bubble trip. Island hole claimed 4 balls.'
+    },
+    {
+      year: 2019, location: 'Augusta, GA', champion: 'Team East', mvp: 'Player 2',
+      teamEastWins: 2, teamWestWins: 1, ties: 0,
+      lowGross: 82, lowGrossPlayer: 'Player 2',
+      lowNet: 71, lowNetPlayer: 'Player 2',
+      mostSkins: 4, mostSkinsPlayer: 'Player 2',
+      highStableford: 33, highStablefordPlayer: 'Player 2',
+      eaglesTotal: 0, birdiesTotal: 10, notes: 'The first Skyline Cup. Skins on a handshake deal. Skyline Chili at the airport won everyone over.'
+    },
+  ],
+  itinerary: [
+    {
+      day: 'Thursday', date: 'May 15',
+      events: [
+        { time: '12pm', text: '<strong>Arrive & Check In</strong><br><span>Hotel / rental house</span>', golf: false },
+        { time: '3pm',  text: '<strong>Practice Round</strong><br><span>Driving range & putting green</span>', golf: true },
+        { time: '7pm',  text: '<strong>Welcome Dinner</strong><br><span>TBD Restaurant</span>', golf: false },
+      ],
+      course: null
+    },
+    {
+      day: 'Friday', date: 'May 16',
+      events: [
+        { time: '8am',  text: '<strong>Breakfast</strong>', golf: false },
+        { time: '10am', text: '<strong>Round 1 Tee Time — Skyline Cup Begins</strong><br><span>Course 1 · Add details in Setup</span>', golf: true },
+        { time: '3pm',  text: '<strong>19th Hole</strong><br><span>Post-round drinks · First scores tallied</span>', golf: false },
+        { time: '7pm',  text: '<strong>Dinner + Skins Settlement</strong><br><span>TBD</span>', golf: false },
+      ],
+      course: { name: 'Course 1 (Placeholder)', par: 72, yards: '6,800', rating: '72.5', slope: '133', holes: 18 }
+    },
+    {
+      day: 'Saturday', date: 'May 17',
+      events: [
+        { time: '8am',  text: '<strong>Breakfast</strong>', golf: false },
+        { time: '10am', text: '<strong>Round 2 Tee Time — Cup on the Line</strong><br><span>Course 2 · Add details in Setup</span>', golf: true },
+        { time: '3pm',  text: '<strong>19th Hole</strong><br><span>Post-round drinks & recap</span>', golf: false },
+        { time: '7pm',  text: '<strong>Championship Dinner 🌶️</strong><br><span>Skyline Cup ceremony · Skyline Chili toast · Side bets settled</span>', golf: false },
+      ],
+      course: { name: 'Course 2 (Placeholder)', par: 72, yards: '7,100', rating: '73.8', slope: '137', holes: 18 }
+    },
+    {
+      day: 'Sunday', date: 'May 18',
+      events: [
+        { time: '9am',  text: '<strong>Brunch + Final Tally</strong><br><span>Skyline 3-Way strongly encouraged</span>', golf: false },
+        { time: '11am', text: '<strong>Bonus Round (optional)</strong><br><span>Course 3 / replay</span>', golf: true },
+        { time: '2pm',  text: '<strong>Depart · Cup Holder Drives Home in Glory</strong>', golf: false },
+      ],
+      course: null
+    },
+  ]
+};
+
+try {
+  const saved = localStorage.getItem('skylineCupState');
+  if (saved) { const parsed = JSON.parse(saved); state = {...state, ...parsed}; }
+} catch(e) {}
+
+function save() {
+  try { localStorage.setItem('skylineCupState', JSON.stringify(state)); } catch(e) {}
+}
+
+// ===== NAV =====
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+  if (page === 'scorecard') renderScorecard();
+  if (page === 'leaderboard') renderLeaderboard();
+  if (page === 'teams') renderTeams();
+  if (page === 'itinerary') renderItinerary();
+  if (page === 'history') renderHistory();
+}
+
+// ===== SETUP =====
+function renderSetup() {
+  const list = document.getElementById('players-list');
+  list.innerHTML = state.players.map((p, i) => `
+    <div class="player-row">
+      <div class="player-avatar ${p.team==='east'?'avatar-east':'avatar-west'}">${(p.name[0]||'?').toUpperCase()}</div>
+      <div class="player-info">
+        <input class="player-name-input" type="text" value="${p.name}" placeholder="Player ${i+1} name"
+          oninput="state.players[${i}].name=this.value;renderSetup()">
+        <div class="player-hdcp">
+          <label>HDCP</label>
+          <input class="hdcp-input" type="number" value="${p.handicap}" min="0" max="54" step="0.1"
+            oninput="state.players[${i}].handicap=parseFloat(this.value)||0">
+          <span style="flex:1"></span>
+          <button onclick="toggleTeam(${i})" class="team-tag ${p.team==='east'?'team-east':'team-west'}">
+            ${p.team==='east'?'🌅 East':'🌄 West'}
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('rounds-list').innerHTML = state.rounds.map((r, i) => `
+    <div style="padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;gap:10px;align-items:center;">
+      <div style="flex:1;">
+        <input type="text" value="${r.name}" placeholder="Round name"
+          style="width:100%;border:none;background:none;font-size:15px;font-weight:700;font-family:'Crimson Pro',serif;color:var(--dark);outline:none;"
+          oninput="state.rounds[${i}].name=this.value">
+        <input type="text" value="${r.course}" placeholder="Course name"
+          style="width:100%;border:none;background:none;font-size:11px;color:var(--muted);outline:none;font-family:'IBM Plex Mono',monospace;margin-top:2px;"
+          oninput="state.rounds[${i}].course=this.value">
+      </div>
+      ${state.rounds.length>1?`<button onclick="removeRound(${i})" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>`:''}
+    </div>`).join('');
+}
+
+function toggleTeam(i) { state.players[i].team = state.players[i].team==='east'?'west':'east'; renderSetup(); }
+function addRound() { state.rounds.push({name:`Round ${state.rounds.length+1}`,course:'',par:Array(18).fill(4)}); renderSetup(); }
+function removeRound(i) { state.rounds.splice(i,1); renderSetup(); }
+function saveSetup() {
+  state.skinValue = parseInt(document.getElementById('skinValue').value)||5;
+  state.carryover = document.getElementById('carryoverCheck').checked;
+  save(); showPage('scorecard');
+}
+
+// ===== SCORECARD =====
+function renderScorecard() {
+  const sel = document.getElementById('round-selector');
+  sel.innerHTML = state.rounds.map((r,i)=>`
+    <button class="round-btn ${i===state.currentRound?'active':''}" onclick="selectRound(${i})">${r.name}</button>`).join('');
+
+  const ri = state.currentRound;
+  if (!state.scores[ri]) state.scores[ri] = {};
+  state.players.forEach((_,pi) => { if(!state.scores[ri][pi]) state.scores[ri][pi]=Array(18).fill(''); });
+
+  const r = state.rounds[ri];
+  let html = `<div class="card-title">📋 ${r.name} — ${r.course||'Course TBD'}</div><div style="overflow-x:auto;"><table class="scorecard-table"><thead><tr><th>HOLE</th>${state.players.map(p=>`<th>${(p.name.split(' ')[0]||'?').substring(0,6)}</th>`).join('')}</tr></thead><tbody>`;
+
+  for(let g=0;g<2;g++){
+    const start=g*9, end=start+9;
+    html+=`<tr class="par-row"><td>${g===0?'FRONT':'BACK'}</td>${state.players.map(()=>'<td></td>').join('')}</tr>`;
+    for(let h=start;h<end;h++){
+      html+=`<tr><td>${h+1}<br><small style="font-size:9px;color:var(--muted);">P${r.par[h]}</small></td>${state.players.map((_,pi)=>{
+        const val=state.scores[ri][pi][h];
+        return `<td><input class="score-cell" type="number" min="1" max="15" value="${val}" id="sc-${ri}-${pi}-${h}" oninput="updateScore(${ri},${pi},${h},this.value)" onfocus="this.select()"></td>`;
+      }).join('')}</tr>`;
+    }
+    html+=`<tr class="total-row"><td>${g===0?'OUT':'IN'}</td>${state.players.map((_,pi)=>{
+      const sub=state.scores[ri][pi].slice(start,end).reduce((a,v)=>a+(parseInt(v)||0),0);
+      return `<td id="sub-${g}-${pi}">${sub||''}</td>`;
+    }).join('')}</tr>`;
+  }
+
+  html+=`<tr class="total-row" style="background:rgba(192,57,43,0.15);"><td>TOT</td>${state.players.map((_,pi)=>{
+    const tot=state.scores[ri][pi].reduce((a,v)=>a+(parseInt(v)||0),0);
+    const parT=r.par.reduce((a,v)=>a+v,0), diff=tot-parT;
+    const ds=tot?(diff>0?`+${diff}`:diff===0?'E':diff):'';
+    return `<td id="tot-${pi}">${tot?`${tot}<br><small style="font-size:9px;color:${diff<0?'var(--red)':'var(--muted)'}">${ds}</small>`:''}`;
+  }).join('')}</tr></tbody></table></div>`;
+
+  document.getElementById('scorecard-area').innerHTML = html;
+  colorAllCells(ri);
+}
+
+function selectRound(i) { state.currentRound=i; renderScorecard(); }
+
+function updateScore(ri,pi,h,val) {
+  if(!state.scores[ri]) state.scores[ri]={};
+  if(!state.scores[ri][pi]) state.scores[ri][pi]=Array(18).fill('');
+  state.scores[ri][pi][h]=val; save();
+  colorCell(ri,pi,h); updateTotals(ri);
+}
+
+function colorCell(ri,pi,h) {
+  const cell=document.getElementById(`sc-${ri}-${pi}-${h}`);
+  if(!cell) return;
+  const val=parseInt(cell.value), par=state.rounds[ri].par[h];
+  cell.className='score-cell';
+  if(!val) return;
+  if(val<=par-2) cell.classList.add('eagle');
+  else if(val===par-1) cell.classList.add('birdie');
+  else if(val===par) cell.classList.add('par-score');
+  else if(val===par+1) cell.classList.add('bogey');
+  else if(val===par+2) cell.classList.add('double');
+  else cell.classList.add('triple-plus');
+}
+
+function colorAllCells(ri) {
+  state.players.forEach((_,pi) => { for(let h=0;h<18;h++) colorCell(ri,pi,h); });
+}
+
+function updateTotals(ri) {
+  state.players.forEach((_,pi) => {
+    const sc=state.scores[ri]?.[pi]||[];
+    const f=sc.slice(0,9).reduce((a,v)=>a+(parseInt(v)||0),0);
+    const b=sc.slice(9,18).reduce((a,v)=>a+(parseInt(v)||0),0);
+    const tot=f+b;
+    const sf=document.getElementById(`sub-0-${pi}`), sb=document.getElementById(`sub-1-${pi}`), te=document.getElementById(`tot-${pi}`);
+    if(sf) sf.textContent=f||'';
+    if(sb) sb.textContent=b||'';
+    const parT=state.rounds[ri].par.reduce((a,v)=>a+v,0), diff=tot-parT;
+    const ds=tot?(diff>0?`+${diff}`:diff===0?'E':diff):'';
+    if(te) te.innerHTML=tot?`${tot}<br><small style="font-size:9px;color:${diff<0?'var(--red)':'var(--muted)'}">${ds}</small>`:'';
+  });
+}
+
+// ===== LEADERBOARD =====
+function showLbTab(tab) {
+  document.querySelectorAll('.lb-tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('lb-'+tab).style.display='block';
+  const idx = ['stroke','net','stableford','skins'].indexOf(tab);
+  document.querySelectorAll('.sub-tab')[idx].classList.add('active');
+}
+
+function getPlayerTotals() {
+  return state.players.map((p,pi) => {
+    let gross=0, stableford=0;
+    state.rounds.forEach((r,ri) => {
+      const sc=state.scores[ri]?.[pi]||[];
+      gross+=sc.reduce((a,v)=>a+(parseInt(v)||0),0);
+      sc.forEach((v,h)=>{
+        const val=parseInt(v); if(!val) return;
+        const diff=val-r.par[h];
+        if(diff<=-2) stableford+=4;
+        else if(diff===-1) stableford+=3;
+        else if(diff===0) stableford+=2;
+        else if(diff===1) stableford+=1;
+      });
+    });
+    const totalPar=state.rounds.reduce((a,r)=>a+r.par.reduce((x,y)=>x+y,0),0);
+    const net=gross>0?gross-Math.round(p.handicap):0;
+    return {player:p, pi, gross, net, stableford, totalPar};
+  });
+}
+
+function renderLeaderboard() {
+  const totals=getPlayerTotals().filter(t=>t.gross>0);
+  const empty='<div class="empty-state"><div class="empty-icon">🌶️</div><p>Enter scores to see standings</p></div>';
+  if(!totals.length) {
+    ['lb-stroke-list','lb-net-list','lb-stableford-list'].forEach(id=>document.getElementById(id).innerHTML=empty);
+    document.getElementById('lb-skins-list').innerHTML=empty;
+    return;
+  }
+
+  const avatarCls = p => p.team==='east'?'avatar-east':'avatar-west';
+
+  // Stroke
+  const ss=[...totals].sort((a,b)=>a.gross-b.gross);
+  document.getElementById('lb-stroke-list').innerHTML=ss.map((t,rank)=>{
+    const diff=t.gross-t.totalPar, ds=diff>0?`+${diff}`:diff===0?'E':diff;
+    return `<div class="leaderboard-item">
+      <div class="rank ${rank===0?'first':rank===1?'second':rank===2?'third':''}">${rank+1}</div>
+      <div class="player-avatar ${avatarCls(t.player)}" style="width:34px;height:34px;font-size:14px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-detail">${t.player.team.toUpperCase()} · HDCP ${t.player.handicap}</div></div>
+      <div class="lb-score ${diff<0?'score-under':diff>0?'score-over':''}">${t.gross}<br><small style="font-size:11px;">${ds}</small></div>
+    </div>`;
+  }).join('');
+
+  // Net
+  const ns=[...totals].filter(t=>t.net>0).sort((a,b)=>a.net-b.net);
+  document.getElementById('lb-net-list').innerHTML=ns.map((t,rank)=>`
+    <div class="leaderboard-item">
+      <div class="rank ${rank===0?'first':rank===1?'second':rank===2?'third':''}">${rank+1}</div>
+      <div class="player-avatar ${avatarCls(t.player)}" style="width:34px;height:34px;font-size:14px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-detail">Gross: ${t.gross} · HDCP: ${t.player.handicap}</div></div>
+      <div class="lb-score">${t.net}</div>
+    </div>`).join('');
+
+  // Stableford
+  const stbs=[...totals].sort((a,b)=>b.stableford-a.stableford);
+  document.getElementById('lb-stableford-list').innerHTML=stbs.map((t,rank)=>`
+    <div class="stableford-row">
+      <div class="rank ${rank===0?'first':rank===1?'second':rank===2?'third':''}">${rank+1}</div>
+      <div class="player-avatar ${avatarCls(t.player)}" style="width:34px;height:34px;font-size:14px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-detail">${t.player.team.toUpperCase()}</div></div>
+      <div><div class="stableford-points">${t.stableford}</div><div class="pts-label">pts</div></div>
+    </div>`).join('');
+
+  renderSkinsLeaderboard();
+}
+
+function renderSkinsLeaderboard() {
+  const skinVal=state.skinValue||5;
+  let skinWins={};
+  state.players.forEach((_,i)=>skinWins[i]=0);
+  let skinsHtml='', carryPot=0;
+
+  state.rounds.forEach((r,ri) => {
+    for(let h=0;h<18;h++){
+      const hs=state.players.map((p,pi)=>({pi,val:parseInt(state.scores[ri]?.[pi]?.[h])||null})).filter(s=>s.val!==null);
+      if(hs.length<2){ skinsHtml+=`<div class="skins-hole"><div class="hole-num">R${ri+1}·H${h+1}</div><div class="skin-winner" style="color:var(--muted);">—</div></div>`; continue; }
+      const minScore=Math.min(...hs.map(s=>s.val));
+      const winners=hs.filter(s=>s.val===minScore);
+      const pot=1+carryPot;
+      if(winners.length===1){
+        const wi=winners[0].pi; skinWins[wi]+=pot;
+        skinsHtml+=`<div class="skins-hole"><div class="hole-num">R${ri+1}·H${h+1}</div><div class="skin-winner">${state.players[wi].name} <small style="color:var(--muted);">(${minScore})</small></div><div class="skin-value">$${pot*skinVal}</div></div>`;
+        carryPot=0;
+      } else if(state.carryover){
+        carryPot++;
+        skinsHtml+=`<div class="skins-hole"><div class="hole-num">R${ri+1}·H${h+1}</div><div class="skin-winner skin-carryover">Tied — carries</div><div class="skin-value" style="background:rgba(192,57,43,0.15);color:var(--red);">↩</div></div>`;
+      } else {
+        skinsHtml+=`<div class="skins-hole"><div class="hole-num">R${ri+1}·H${h+1}</div><div class="skin-winner" style="color:var(--muted);">Tied</div></div>`;
+      }
+    }
+  });
+
+  document.getElementById('lb-skins-list').innerHTML=skinsHtml||'<div class="empty-state"><p>Enter scores to track skins</p></div>';
+  document.getElementById('skins-summary').innerHTML=state.players.map((p,pi)=>`
+    <div class="weekend-stat">
+      <div class="weekend-stat-label"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.team==='east'?'var(--red)':'var(--gold)'};margin-right:7px;"></span>${p.name}</div>
+      <div class="weekend-stat-value">$${skinWins[pi]*skinVal} (${skinWins[pi]} skin${skinWins[pi]!==1?'s':''})</div>
+    </div>`).join('');
+}
+
+// ===== TEAMS =====
+function renderTeams() {
+  const ep=state.players.filter(p=>p.team==='east');
+  const wp=state.players.filter(p=>p.team==='west');
+  let ew=0,ww=0,ties=0;
+
+  const teamScore=(team,ri)=>state.players.reduce((a,p,pi)=>{
+    if(p.team!==team) return a;
+    return a+(state.scores[ri]?.[pi]?.reduce((x,v)=>x+(parseInt(v)||0),0)||0);
+  },0);
+
+  let mHtml=state.rounds.map((r,ri)=>{
+    const es=teamScore('east',ri), ws=teamScore('west',ri);
+    let st='No scores yet';
+    if(es>0&&ws>0){
+      if(es<ws){ew++;st='🌅 East Wins';}
+      else if(ws<es){ww++;st='🌄 West Wins';}
+      else{ties++;st='🤝 All Square';}
+    }
+    return `<div class="matchup-card">
+      <div class="matchup-title">${r.name} · ${r.course||'TBD'}</div>
+      <div class="match-teams">
+        <div class="match-team"><div class="match-team-name" style="color:var(--red-light);">East</div><div class="match-team-players">${ep.map(p=>p.name.split(' ')[0]).join(' & ')}</div></div>
+        <div style="text-align:center;"><div class="match-score-display">${es||'—'} <span style="font-size:16px;opacity:0.4;">v</span> ${ws||'—'}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;">STROKE</div></div>
+        <div class="match-team"><div class="match-team-name" style="color:var(--gold);">West</div><div class="match-team-players">${wp.map(p=>p.name.split(' ')[0]).join(' & ')}</div></div>
+      </div>
+      <div class="match-status"><span class="status-pill">${st}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('team-matchup-area').innerHTML=mHtml;
+  const leader=ew>ww?'🌅 East leads':ww>ew?'🌄 West leads':'🤝 All square';
+  document.getElementById('weekend-record').innerHTML=`
+    <div class="weekend-stat"><div class="weekend-stat-label">🌅 Team East</div><div class="weekend-stat-value" style="color:var(--red);">${ew} Win${ew!==1?'s':''}</div></div>
+    <div class="weekend-stat"><div class="weekend-stat-label">🌄 Team West</div><div class="weekend-stat-value" style="color:var(--gold);">${ww} Win${ww!==1?'s':''}</div></div>
+    <div class="weekend-stat"><div class="weekend-stat-label">Ties</div><div class="weekend-stat-value">${ties}</div></div>
+    <div class="weekend-stat" style="border-top:2px solid rgba(0,0,0,0.08);margin-top:4px;padding-top:12px;"><div class="weekend-stat-label">Standing</div><div class="weekend-stat-value">${leader}</div></div>`;
+}
+
+// ===== ITINERARY =====
+function renderItinerary() {
+  document.getElementById('itinerary-content').innerHTML = state.itinerary.map((day,di)=>`
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+        <div class="day-circle">${di+1}</div>
+        <div><div class="day-label">${day.date}</div><div class="day-name">${day.day}</div></div>
+      </div>
+      ${day.events.map(ev=>`
+        <div class="itinerary-event ${ev.golf?'golf-event':''}">
+          <div class="event-time">${ev.time}</div>
+          <div class="event-text">${ev.text}</div>
+        </div>`).join('')}
+      ${day.course?`<div class="course-info-box">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--red-dark);letter-spacing:0.5px;margin-bottom:6px;">⛳ ${day.course.name}</div>
+        ${['holes','par','yards','rating','slope'].map(k=>`<div class="course-stat"><span class="course-stat-label">${k.toUpperCase()}</span><span class="course-stat-value">${day.course[k]}</span></div>`).join('')}
+      </div>`:''}
+    </div>`).join('');
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  // All-time stats
+  const h = state.history;
+  const totalYears = h.length;
+  const eastWins = h.filter(y=>y.champion==='Team East').length;
+  const westWins = h.filter(y=>y.champion==='Team West').length;
+  const totalEagles = h.reduce((a,y)=>a+(y.eaglesTotal||0),0);
+  const totalBirdies = h.reduce((a,y)=>a+(y.birdiesTotal||0),0);
+
+  document.getElementById('alltime-stats').innerHTML = `
+    <div class="stat-box"><div class="stat-box-value">${totalYears}</div><div class="stat-box-label">Years Played</div></div>
+    <div class="stat-box"><div class="stat-box-value">${eastWins}–${westWins}</div><div class="stat-box-label">East–West Cups</div></div>
+    <div class="stat-box"><div class="stat-box-value">${totalEagles}</div><div class="stat-box-label">Total Eagles</div></div>
+    <div class="stat-box"><div class="stat-box-value">${totalBirdies}</div><div class="stat-box-label">Total Birdies</div></div>
+  `;
+
+  // Records
+  if(h.length>0) {
+    const lowGrossEntry = h.reduce((best,y)=>y.lowGross<best.lowGross?y:best, h[0]);
+    const lowNetEntry   = h.reduce((best,y)=>y.lowNet<best.lowNet?y:best, h[0]);
+    const skinEntry     = h.reduce((best,y)=>y.mostSkins>best.mostSkins?y:best, h[0]);
+    const stabEntry     = h.reduce((best,y)=>y.highStableford>best.highStableford?y:best, h[0]);
+
+    // Who has most MVPs
+    const mvpCount = {};
+    h.forEach(y=>{ if(y.mvp) mvpCount[y.mvp]=(mvpCount[y.mvp]||0)+1; });
+    const topMvp = Object.entries(mvpCount).sort((a,b)=>b[1]-a[1])[0];
+
+    // Who has most cups
+    const champCount = {};
+    h.forEach(y=>{ if(y.champion) champCount[y.champion]=(champCount[y.champion]||0)+1; });
+    const topChamp = Object.entries(champCount).sort((a,b)=>b[1]-a[1])[0];
+
+    document.getElementById('records-list').innerHTML = `
+      <div class="record-item"><div class="record-icon">🦅</div><div class="record-info"><div class="record-label">Low Gross Round</div><div class="record-holder">${lowGrossEntry.lowGrossPlayer} · ${lowGrossEntry.year} · ${lowGrossEntry.location}</div></div><div class="record-value">${lowGrossEntry.lowGross}</div></div>
+      <div class="record-item"><div class="record-icon">📊</div><div class="record-info"><div class="record-label">Low Net Round</div><div class="record-holder">${lowNetEntry.lowNetPlayer} · ${lowNetEntry.year}</div></div><div class="record-value">${lowNetEntry.lowNet}</div></div>
+      <div class="record-item"><div class="record-icon">💰</div><div class="record-info"><div class="record-label">Most Skins (Year)</div><div class="record-holder">${skinEntry.mostSkinsPlayer} · ${skinEntry.year}</div></div><div class="record-value">${skinEntry.mostSkins}</div></div>
+      <div class="record-item"><div class="record-icon">⭐</div><div class="record-info"><div class="record-label">High Stableford</div><div class="record-holder">${stabEntry.highStablefordPlayer} · ${stabEntry.year}</div></div><div class="record-value">${stabEntry.highStableford} pts</div></div>
+      <div class="record-item"><div class="record-icon">🏆</div><div class="record-info"><div class="record-label">Most Cup Wins</div><div class="record-holder">${topChamp?topChamp[0]:'—'}</div></div><div class="record-value">${topChamp?topChamp[1]:0}x</div></div>
+      <div class="record-item"><div class="record-icon">🌟</div><div class="record-info"><div class="record-label">Most MVP Awards</div><div class="record-holder">${topMvp?topMvp[0]:'—'}</div></div><div class="record-value">${topMvp?topMvp[1]:0}x</div></div>
+    `;
+  }
+
+  // Year by year
+  document.getElementById('history-years').innerHTML = state.history.map((y,yi)=>`
+    <div class="year-card">
+      <div class="year-header" onclick="toggleYear(${yi})">
+        <div>
+          <div class="year-title">🏆 ${y.year} · ${y.location||'TBD'}</div>
+          <div class="year-champion">Champions: ${y.champion} · MVP: ${y.mvp}</div>
+        </div>
+        <div class="year-toggle" id="ytoggle-${yi}">▼</div>
+      </div>
+      <div class="year-body" id="ybody-${yi}">
+        <div class="year-stat-row"><span class="year-stat-key">📍 Location</span><input class="hist-input" value="${y.location||''}" oninput="state.history[${yi}].location=this.value;save()" placeholder="Location"></div>
+        <div class="year-stat-row"><span class="year-stat-key">🏆 Champion</span><input class="hist-input" value="${y.champion||''}" oninput="state.history[${yi}].champion=this.value;save()" placeholder="Team East / Team West"></div>
+        <div class="year-stat-row"><span class="year-stat-key">🌟 MVP</span><input class="hist-input" value="${y.mvp||''}" oninput="state.history[${yi}].mvp=this.value;save()" placeholder="Player name"></div>
+        <div class="year-stat-row"><span class="year-stat-key">🌅 East Wins</span><input class="hist-input" type="number" value="${y.teamEastWins||0}" oninput="state.history[${yi}].teamEastWins=parseInt(this.value)||0;save()"></div>
+        <div class="year-stat-row"><span class="year-stat-key">🌄 West Wins</span><input class="hist-input" type="number" value="${y.teamWestWins||0}" oninput="state.history[${yi}].teamWestWins=parseInt(this.value)||0;save()"></div>
+        <div class="year-stat-row"><span class="year-stat-key">Low Gross</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <input class="hist-input" style="width:80px;" type="number" value="${y.lowGross||''}" oninput="state.history[${yi}].lowGross=parseInt(this.value)||0;save()" placeholder="Score">
+            <input class="hist-input" style="width:90px;font-size:11px;" value="${y.lowGrossPlayer||''}" oninput="state.history[${yi}].lowGrossPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="year-stat-row"><span class="year-stat-key">Low Net</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <input class="hist-input" style="width:80px;" type="number" value="${y.lowNet||''}" oninput="state.history[${yi}].lowNet=parseInt(this.value)||0;save()" placeholder="Score">
+            <input class="hist-input" style="width:90px;font-size:11px;" value="${y.lowNetPlayer||''}" oninput="state.history[${yi}].lowNetPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="year-stat-row"><span class="year-stat-key">Most Skins</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <input class="hist-input" style="width:50px;" type="number" value="${y.mostSkins||''}" oninput="state.history[${yi}].mostSkins=parseInt(this.value)||0;save()">
+            <input class="hist-input" style="width:120px;font-size:11px;" value="${y.mostSkinsPlayer||''}" oninput="state.history[${yi}].mostSkinsPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="year-stat-row"><span class="year-stat-key">High Stableford</span>
+          <span style="display:flex;align-items:center;gap:6px;">
+            <input class="hist-input" style="width:60px;" type="number" value="${y.highStableford||''}" oninput="state.history[${yi}].highStableford=parseInt(this.value)||0;save()"> pts
+            <input class="hist-input" style="width:90px;font-size:11px;" value="${y.highStablefordPlayer||''}" oninput="state.history[${yi}].highStablefordPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="year-stat-row"><span class="year-stat-key">🦅 Eagles</span><input class="hist-input" type="number" value="${y.eaglesTotal||0}" oninput="state.history[${yi}].eaglesTotal=parseInt(this.value)||0;save()"></div>
+        <div class="year-stat-row"><span class="year-stat-key">🐦 Birdies</span><input class="hist-input" type="number" value="${y.birdiesTotal||0}" oninput="state.history[${yi}].birdiesTotal=parseInt(this.value)||0;save()"></div>
+        <div class="year-stat-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <span class="year-stat-key">📝 Notes</span>
+          <textarea style="width:100%;border:1px solid #ddd;border-radius:6px;padding:6px;font-family:'Crimson Pro',serif;font-size:13px;font-style:italic;color:var(--dark);outline:none;resize:none;min-height:52px;" oninput="state.history[${yi}].notes=this.value;save()" placeholder="Memorable moments...">${y.notes||''}</textarea>
+        </div>
+        <button onclick="removeYear(${yi})" style="margin-top:8px;padding:6px 14px;background:none;border:1px solid rgba(192,57,43,0.3);border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--red);cursor:pointer;text-transform:uppercase;letter-spacing:1px;">Remove Year</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleYear(i) {
+  const body = document.getElementById(`ybody-${i}`);
+  const toggle = document.getElementById(`ytoggle-${i}`);
+  const open = body.classList.toggle('open');
+  toggle.classList.toggle('open', open);
+}
+
+function addHistoryYear() {
+  const yr = state.history.length>0 ? state.history[0].year+1 : new Date().getFullYear();
+  state.history.unshift({
+    year: yr, location: '', champion: '', mvp: '',
+    teamEastWins: 0, teamWestWins: 0, ties: 0,
+    lowGross: 0, lowGrossPlayer: '', lowNet: 0, lowNetPlayer: '',
+    mostSkins: 0, mostSkinsPlayer: '', highStableford: 0, highStablefordPlayer: '',
+    eaglesTotal: 0, birdiesTotal: 0, notes: ''
+  });
+  save(); renderHistory();
+}
+
+function removeYear(i) {
+  if(confirm('Remove this year?')) { state.history.splice(i,1); save(); renderHistory(); }
+}
+
+// ===== INIT =====
+renderSetup();
+renderItinerary();
+</script>
+</body>
+</html>
