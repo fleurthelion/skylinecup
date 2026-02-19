@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Skyline Cup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:       #1a4a2e;
+    --green-mid:   #2d6e47;
+    --green-light: #4a9e6e;
+    --green-pale:  #e8f4ee;
+    --cream:       #f5f0e8;
+    --gold:        #c9a84c;
+    --gold-light:  #e8c96a;
+    --white:       #fafaf8;
+    --dark:        #0d1f15;
+    --text:        #1c2e22;
+    --muted:       #6b8c74;
+    --red:         #c0392b;
+    --blue:        #2c5f8a;
+    --card:        rgba(255,255,255,0.94);
+    --shadow:      0 4px 24px rgba(13,31,21,0.14);
+    --shadow-lg:   0 8px 40px rgba(13,31,21,0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--green);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 10%, rgba(74,158,110,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 85%, rgba(201,168,76,0.12) 0%, transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 44px, rgba(255,255,255,0.018) 44px, rgba(255,255,255,0.018) 88px);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app {
+    position: relative; z-index: 1;
+    max-width: 430px; margin: 0 auto;
+    min-height: 100vh; display: flex; flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    padding: 22px 20px 14px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(13,31,21,0.55) 0%, transparent 100%);
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); opacity: 0.85; margin-bottom: 2px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px; font-weight: 900;
+    color: var(--cream); letter-spacing: -0.5px; line-height: 1;
+  }
+  .header-title span { color: var(--gold); }
+  .header-dates {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: var(--green-light);
+    letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;
+  }
+  .team-strip {
+    display: flex; gap: 8px; justify-content: center; margin-top: 10px;
+  }
+  .team-badge {
+    padding: 4px 16px; border-radius: 20px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .badge-east { background: var(--gold); color: var(--dark); }
+  .badge-west { background: var(--blue); color: #fff; }
+
+  /* ── NAV ── */
+  .nav {
+    display: flex;
+    background: rgba(13,31,21,0.72);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid rgba(201,168,76,0.22);
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex: 1; min-width: 56px;
+    padding: 11px 3px 9px;
+    background: none; border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    transition: color 0.2s;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-btn .ic { font-size: 16px; }
+  .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .nav-btn:hover:not(.active) { color: var(--cream); }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; padding: 14px; overflow-y: auto; }
+  .page { display: none; animation: fadeUp 0.25s ease; }
+  .page.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card); border-radius: 16px;
+    padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.6);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--green); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pill {
+    font-family: 'DM Mono', monospace; font-size: 8px;
+    background: var(--green); color: var(--gold);
+    padding: 2px 8px; border-radius: 10px;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* ── HOME PAGE ── */
+  .trophy-hero {
+    background: linear-gradient(145deg, var(--green) 0%, #1e5a36 100%);
+    border-radius: 20px; padding: 24px 20px 20px;
+    text-align: center; margin-bottom: 12px;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(201,168,76,0.25);
+  }
+  .trophy-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(60deg,transparent,transparent 30px,rgba(255,255,255,0.02) 30px,rgba(255,255,255,0.02) 60px);
+  }
+  .trophy-glow {
+    font-size: 64px; display: block;
+    filter: drop-shadow(0 0 20px rgba(201,168,76,0.5));
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{filter:drop-shadow(0 0 16px rgba(201,168,76,0.4))} 50%{filter:drop-shadow(0 0 28px rgba(201,168,76,0.7))} }
+  .trophy-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 900;
+    color: var(--cream); letter-spacing: 0.5px; margin-top: 8px;
+  }
+  .trophy-name span { color: var(--gold); }
+  .trophy-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: rgba(255,255,255,0.45);
+    letter-spacing: 3px; text-transform: uppercase; margin-top: 4px;
+  }
+  .trophy-dates {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--gold);
+    letter-spacing: 1px; margin-top: 10px;
+    background: rgba(201,168,76,0.12);
+    display: inline-block; padding: 5px 16px;
+    border-radius: 20px; border: 1px solid rgba(201,168,76,0.25);
+  }
+
+  /* team matchup hero */
+  .matchup-hero {
+    background: linear-gradient(135deg, #0d2818 0%, #1a3d28 100%);
+    border-radius: 16px; padding: 18px;
+    margin-bottom: 12px; color: #fff;
+    border: 1px solid rgba(201,168,76,0.2);
+    box-shadow: var(--shadow);
+  }
+  .mh-label {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 14px;
+  }
+  .mh-teams { display: flex; align-items: center; }
+  .mh-team { flex: 1; text-align: center; }
+  .mh-team-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 900;
+  }
+  .mh-team-players { font-size: 11px; color: rgba(255,255,255,0.45); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .mh-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px; font-weight: 900;
+    color: var(--gold); text-align: center; line-height: 1; flex: 1;
+  }
+  .mh-status {
+    text-align: center; margin-top: 12px;
+    font-family: 'DM Mono', monospace; font-size: 10px;
+  }
+  .mh-pill {
+    display: inline-block; padding: 4px 18px; border-radius: 20px;
+    background: rgba(201,168,76,0.14); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold); letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  /* individual standings */
+  .standing-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .standing-row:last-child { border-bottom: none; }
+  .st-rank {
+    font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900;
+    color: var(--muted); width: 28px; text-align: center; flex-shrink: 0;
+  }
+  .st-rank.r1 { color: var(--gold); }
+  .st-rank.r2 { color: #aaa; }
+  .st-rank.r3 { color: #c08050; }
+  .st-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .av-east { background: var(--gold); color: var(--dark); }
+  .av-west { background: var(--blue); color: #fff; }
+  .st-info { flex: 1; }
+  .st-name { font-weight: 600; font-size: 15px; }
+  .st-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .st-score { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 600; }
+  .col-red { color: var(--red); }
+  .col-green { color: var(--green); }
+
+  /* ── SETUP PAGE ── */
+  .player-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
+  }
+  .player-row:last-child { border-bottom: none; }
+  .p-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; flex-shrink: 0;
+    font-family: 'DM Mono', monospace;
+  }
+  .p-info { flex: 1; min-width: 0; }
+  .p-name-in {
+    width: 100%; border: none; background: none;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    color: var(--text); outline: none;
+  }
+  .p-name-in::placeholder { color: var(--muted); }
+  .p-sub { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .p-sub label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .hdcp-in {
+    width: 50px; border: 1px solid #ddd; border-radius: 6px;
+    padding: 2px 6px; font-family: 'DM Mono', monospace;
+    font-size: 13px; text-align: center;
+  }
+  .team-tog {
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    padding: 3px 10px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: 1px;
+    border: none; cursor: pointer;
+  }
+  .save-btn {
+    width: 100%; padding: 14px;
+    background: var(--green); color: var(--gold);
+    border: none; border-radius: 12px;
+    font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+    cursor: pointer; margin-top: 6px; letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(26,74,46,0.35);
+    transition: all 0.2s;
+  }
+  .save-btn:hover { background: var(--green-mid); transform: translateY(-1px); }
+
+  /* ── SCORECARD ── */
+  .round-sel { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .round-sel::-webkit-scrollbar { display: none; }
+  .r-btn {
+    flex-shrink: 0; padding: 6px 16px; border-radius: 20px;
+    border: 1.5px solid var(--green); background: none;
+    color: var(--cream); font-family: 'DM Mono', monospace;
+    font-size: 10px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .r-btn.active { background: var(--green); color: var(--gold); }
+
+  .sc-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .sc-table th {
+    background: var(--green); color: var(--gold);
+    font-family: 'DM Mono', monospace; font-size: 9px;
+    letter-spacing: 1px; padding: 7px 3px; text-align: center;
+  }
+  .sc-table th:first-child { text-align: left; padding-left: 8px; border-radius: 8px 0 0 0; }
+  .sc-table th:last-child { border-radius: 0 8px 0 0; }
+  .sc-table td { padding: 5px 3px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.06); vertical-align: middle; }
+  .sc-table td:first-child { text-align: left; padding-left: 8px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); font-weight: 600; }
+  .sc-table tr.par-row td { background: rgba(26,74,46,0.07); font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); font-size: 10px; }
+  .sc-table tr.tot-row td { background: rgba(26,74,46,0.12); font-weight: 700; font-family: 'DM Mono', monospace; }
+  .sc-in {
+    width: 33px; height: 27px; border: 1px solid #ddd; border-radius: 5px;
+    text-align: center; font-family: 'DM Mono', monospace; font-size: 12px;
+    background: #fff; outline: none; display: block; margin: 0 auto; padding: 0;
+  }
+  .sc-in:focus { border-color: var(--green); }
+  .eagle  { background: #ffd700 !important; color: #333 !important; }
+  .birdie { background: #e74c3c !important; color: #fff !important; }
+  .par-s  { background: #fff !important; }
+  .bogey  { background: #eaf3ea !important; }
+  .dbl    { background: #d9ecda !important; }
+  .trip   { background: #c8e2ca !important; }
+
+  /* ── LEADERBOARD ── */
+  .sub-tabs {
+    display: flex; background: rgba(0,0,0,0.08);
+    border-radius: 10px; padding: 3px; margin-bottom: 12px;
+  }
+  .s-tab {
+    flex: 1; padding: 7px 4px; border: none; background: none;
+    border-radius: 8px; font-family: 'DM Mono', monospace;
+    font-size: 9px; letter-spacing: 0.5px; cursor: pointer;
+    color: var(--muted); transition: all 0.2s; text-transform: uppercase;
+  }
+  .s-tab.active { background: var(--green); color: var(--gold); box-shadow: 0 1px 6px rgba(26,74,46,0.3); }
+
+  .lb-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .lb-item:last-child { border-bottom: none; }
+  .lb-rank { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--muted); width: 26px; text-align: center; }
+  .lb-rank.r1 { color: var(--gold); }
+  .lb-rank.r2 { color: #aaa; }
+  .lb-rank.r3 { color: #c08050; }
+  .lb-info { flex: 1; }
+  .lb-name { font-weight: 600; font-size: 15px; }
+  .lb-sub  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 1px; }
+  .lb-val  { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 600; }
+
+  .skins-hole { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .skins-hole:last-child { border-bottom: none; }
+  .sh-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); width: 48px; }
+  .sh-winner { flex: 1; font-size: 13px; font-weight: 500; }
+  .sh-val { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: var(--gold-light); background: var(--green); padding: 2px 9px; border-radius: 10px; }
+  .sh-carry { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--red); font-style: italic; }
+
+  .stab-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.07); }
+  .stab-row:last-child { border-bottom: none; }
+  .stab-pts { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--green); width: 42px; text-align: right; }
+
+  /* ── TEAMS ── */
+  .match-card {
+    background: linear-gradient(135deg, var(--green) 0%, #1e5a36 100%);
+    border-radius: 16px; padding: 18px; margin-bottom: 12px;
+    color: #fff; position: relative; overflow: hidden;
+    border: 1px solid rgba(201,168,76,0.2); box-shadow: var(--shadow);
+  }
+  .match-card::after { content:'⛳'; position:absolute; right:-8px; top:-8px; font-size:64px; opacity:0.07; }
+  .mc-label { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:12px; }
+  .mc-teams { display:flex; align-items:center; gap:10px; }
+  .mc-team { flex:1; text-align:center; }
+  .mc-tname { font-family:'Playfair Display',serif; font-size:20px; font-weight:900; }
+  .mc-players { font-size:10px; color:rgba(255,255,255,0.45); font-family:'DM Mono',monospace; margin-top:2px; }
+  .mc-score { font-family:'Playfair Display',serif; font-size:38px; font-weight:900; color:var(--gold); text-align:center; line-height:1; flex:1; }
+  .mc-status { text-align:center; margin-top:10px; }
+  .mc-pill { display:inline-block; padding:4px 16px; border-radius:20px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; background:rgba(201,168,76,0.14); border:1px solid rgba(201,168,76,0.3); color:var(--gold); text-transform:uppercase; }
+
+  .wk-stat { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.07); font-size:14px; }
+  .wk-stat:last-child { border-bottom:none; }
+  .wk-label { color:var(--muted); }
+  .wk-val { font-family:'DM Mono',monospace; font-weight:600; }
+
+  /* ── ITINERARY ── */
+  .day-hd { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .day-circle { width:44px; height:44px; border-radius:50%; background:var(--green); color:var(--gold); font-family:'Playfair Display',serif; font-size:18px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .day-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--green); }
+  .day-date { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+  .it-event { display:flex; gap:10px; padding:7px 0; border-left:2px solid var(--green-light); padding-left:14px; margin-left:8px; position:relative; }
+  .it-event::before { content:''; position:absolute; left:-5px; top:11px; width:8px; height:8px; border-radius:50%; background:var(--green-light); }
+  .it-event.golf::before { background:var(--gold); }
+  .it-time { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); width:38px; flex-shrink:0; padding-top:2px; }
+  .it-text { font-size:13px; line-height:1.45; }
+  .it-text strong { font-weight:600; }
+  .it-text span { color:var(--muted); font-size:12px; }
+  .course-box { background:rgba(26,74,46,0.06); border:1px solid rgba(26,74,46,0.14); border-radius:10px; padding:12px; margin-top:10px; }
+  .cs { display:flex; justify-content:space-between; padding:4px 0; font-size:13px; }
+  .cs-label { color:var(--muted); font-family:'DM Mono',monospace; font-size:10px; }
+  .cs-val { font-weight:700; color:var(--green); }
+
+  /* ── GOLFER PROFILES ── */
+  .profile-hero {
+    background: linear-gradient(145deg, var(--green), #1e5a36);
+    border-radius: 16px; padding: 20px;
+    margin-bottom: 12px; color:#fff;
+    border: 1px solid rgba(201,168,76,0.2);
+    box-shadow: var(--shadow);
+  }
+  .profile-select {
+    display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto;
+    scrollbar-width: none; padding-bottom: 2px;
+  }
+  .profile-select::-webkit-scrollbar { display: none; }
+  .prof-btn {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+    border: 1.5px solid rgba(201,168,76,0.4);
+    background: none; color: rgba(255,255,255,0.6);
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+  }
+  .prof-btn.active { background: var(--gold); color: var(--dark); border-color: var(--gold); font-weight: 600; }
+
+  .prof-main { display: flex; align-items: center; gap: 14px; }
+  .prof-avatar-lg {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900;
+    flex-shrink: 0; border: 3px solid rgba(201,168,76,0.4);
+  }
+  .prof-title { }
+  .prof-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--cream); }
+  .prof-team { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+  .prof-hdcp { font-family: 'DM Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+  .prof-stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-top: 16px;
+  }
+  .ps-box {
+    background: rgba(255,255,255,0.07); border-radius: 10px;
+    padding: 10px 8px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .ps-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--gold); line-height: 1; }
+  .ps-label { font-family: 'DM Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+  .prof-career { }
+  .pc-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.07); font-size:14px; }
+  .pc-row:last-child { border-bottom:none; }
+  .pc-label { color:var(--muted); font-size:13px; }
+  .pc-val { font-family:'DM Mono',monospace; font-weight:600; color:var(--text); }
+
+  .achiev-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .achiev-item {
+    background: var(--green-pale); border-radius:10px; padding:10px;
+    border: 1px solid rgba(26,74,46,0.12); text-align:center;
+  }
+  .achiev-icon { font-size:22px; }
+  .achiev-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:4px; }
+  .achiev-val { font-weight:700; font-size:13px; color:var(--green); margin-top:2px; }
+
+  /* ── LEAGUE HISTORY ── */
+  .history-trophy {
+    background: linear-gradient(145deg, var(--gold) 0%, #b8900a 100%);
+    border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 12px;
+    box-shadow: var(--shadow-lg);
+    position: relative; overflow: hidden;
+  }
+  .history-trophy::before { content:''; position:absolute; inset:0; background:repeating-linear-gradient(45deg,transparent,transparent 12px,rgba(255,255,255,0.04) 12px,rgba(255,255,255,0.04) 24px); }
+  .ht-icon { font-size:44px; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.2)); }
+  .ht-title { font-family:'Playfair Display',serif; font-size:24px; font-weight:900; color:var(--dark); margin-top:6px; }
+  .ht-sub { font-family:'DM Mono',monospace; font-size:10px; color:rgba(13,31,21,0.55); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; }
+
+  .kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+  .kpi-box {
+    background:var(--card); border-radius:12px; padding:12px; text-align:center;
+    box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.6);
+  }
+  .kpi-val { font-family:'Playfair Display',serif; font-size:26px; font-weight:900; color:var(--green); line-height:1; }
+  .kpi-label { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+
+  .record-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.07); }
+  .record-item:last-child { border-bottom:none; }
+  .rec-icon { font-size:20px; width:26px; text-align:center; flex-shrink:0; }
+  .rec-info { flex:1; }
+  .rec-label { font-size:13px; font-weight:600; }
+  .rec-holder { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-top:1px; }
+  .rec-val { font-family:'Playfair Display',serif; font-size:20px; font-weight:900; color:var(--red); }
+
+  .yr-card { background:var(--card); border-radius:12px; margin-bottom:8px; overflow:hidden; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,0.5); }
+  .yr-hd { background:var(--green); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+  .yr-title { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:var(--cream); }
+  .yr-champ { font-family:'DM Mono',monospace; font-size:9px; color:var(--gold); margin-top:1px; }
+  .yr-arrow { color:var(--gold); font-size:14px; transition:transform 0.2s; }
+  .yr-arrow.open { transform:rotate(180deg); }
+  .yr-body { display:none; padding:12px 14px; }
+  .yr-body.open { display:block; }
+  .yr-stat { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:13px; }
+  .yr-stat:last-child { border-bottom:none; }
+  .yr-stat-k { color:var(--muted); font-size:12px; }
+  .yr-stat-v { font-family:'DM Mono',monospace; font-weight:600; color:var(--green); }
+  .hist-in { border:none; background:none; font-family:'DM Mono',monospace; font-size:13px; font-weight:600; color:var(--green); outline:none; text-align:right; width:100%; }
+  .hist-in:focus { border-bottom:1px solid var(--green); }
+
+  .add-yr-btn { width:100%; padding:11px; background:none; border:2px dashed rgba(201,168,76,0.35); border-radius:12px; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--gold-light); cursor:pointer; transition:all 0.2s; margin-bottom:10px; text-transform:uppercase; }
+  .add-yr-btn:hover { background:rgba(201,168,76,0.07); }
+
+  .empty-state { text-align:center; padding:28px 16px; color:var(--muted); }
+  .empty-icon { font-size:36px; margin-bottom:8px; }
+
+  .skin-val-in { width:68px; border:1px solid #ddd; border-radius:8px; padding:5px 8px; font-family:'DM Mono',monospace; font-size:14px; text-align:center; }
+
+  .footer { text-align:center; padding:10px; font-family:'DM Mono',monospace; font-size:8px; color:rgba(255,255,255,0.15); letter-spacing:2px; text-transform:uppercase; }
+
+  @media (min-width:431px) { .app { box-shadow: 0 0 80px rgba(0,0,0,0.5); } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">Cincinnati's Premier Golf Event</div>
+    <div class="header-title">The <span>Skyline</span> Cup</div>
+    <div class="header-dates">May 22 – 26, 2025 &nbsp;·&nbsp; 4 Players &nbsp;·&nbsp; 2 Teams</div>
+    <div class="team-strip">
+      <span class="team-badge badge-east">🌅 Team East</span>
+      <span class="team-badge badge-west">🌄 Team West</span>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('home')" id="nav-home"><span class="ic">🏆</span>Home</button>
+    <button class="nav-btn" onclick="showPage('setup')" id="nav-setup"><span class="ic">👤</span>Setup</button>
+    <button class="nav-btn" onclick="showPage('scorecard')" id="nav-scorecard"><span class="ic">📋</span>Scores</button>
+    <button class="nav-btn" onclick="showPage('leaderboard')" id="nav-leaderboard"><span class="ic">📊</span>Board</button>
+    <button class="nav-btn" onclick="showPage('teams')" id="nav-teams"><span class="ic">🤝</span>Teams</button>
+    <button class="nav-btn" onclick="showPage('profiles')" id="nav-profiles"><span class="ic">🏌️</span>Golfers</button>
+    <button class="nav-btn" onclick="showPage('itinerary')" id="nav-itinerary"><span class="ic">🗓️</span>Schedule</button>
+    <button class="nav-btn" onclick="showPage('history')" id="nav-history"><span class="ic">📜</span>History</button>
+  </nav>
+
+  <div class="content">
+
+    <!-- ══════════ HOME ══════════ -->
+    <div class="page active" id="page-home">
+
+      <div class="trophy-hero">
+        <span class="trophy-glow">🏆</span>
+        <div class="trophy-name">The <span>Skyline</span> Cup</div>
+        <div class="trophy-year">Est. 2019 · Cincinnati's Finest</div>
+        <div class="trophy-dates">📅 May 22 – 26, 2025</div>
+      </div>
+
+      <!-- Team matchup -->
+      <div class="matchup-hero" id="home-matchup">
+        <div class="mh-label">Current Standing</div>
+        <div class="mh-teams">
+          <div class="mh-team">
+            <div class="mh-team-name" style="color:var(--gold-light);">East</div>
+            <div class="mh-team-players" id="east-names">—</div>
+          </div>
+          <div class="mh-score" id="home-team-score">— · —</div>
+          <div class="mh-team">
+            <div class="mh-team-name" style="color:#7ab3d4;">West</div>
+            <div class="mh-team-players" id="west-names">—</div>
+          </div>
+        </div>
+        <div class="mh-status"><span class="mh-pill" id="home-match-status">No scores yet</span></div>
+      </div>
+
+      <!-- Individual standings -->
+      <div class="card">
+        <div class="card-title">📊 Individual Standings <span class="pill">Gross</span></div>
+        <div id="home-standings">
+          <div class="empty-state"><div class="empty-icon">⛳</div><p style="font-size:14px;">Enter scores to see standings</p></div>
+        </div>
+      </div>
+
+      <!-- Quick skins tally -->
+      <div class="card">
+        <div class="card-title">💰 Skins Pot</div>
+        <div id="home-skins">
+          <div class="empty-state" style="padding:14px 0 4px;"><p style="font-size:13px;color:var(--muted);">No skins claimed yet</p></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════ SETUP ══════════ -->
+    <div class="page" id="page-setup">
+      <div class="card">
+        <div class="card-title">👤 Players & Handicaps</div>
+        <div id="players-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Skins</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;">
+          <span style="flex:1;font-size:14px;">Value per skin</span>
+          <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);">$</span>
+          <input type="number" class="skin-val-in" id="skinValue" value="5" min="1">
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid rgba(0,0,0,0.06);">
+          <span style="flex:1;font-size:14px;">Carry over ties?</span>
+          <input type="checkbox" id="carryCheck" checked style="width:18px;height:18px;accent-color:var(--green);">
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📅 Rounds</div>
+        <div id="rounds-list"></div>
+        <button onclick="addRound()" style="margin-top:10px;padding:8px 16px;border:1.5px dashed var(--green);background:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--green);cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:1px;">+ Add Round</button>
+      </div>
+      <button class="save-btn" onclick="saveSetup()">Save & Start Playing ⛳</button>
+    </div>
+
+    <!-- ══════════ SCORECARD ══════════ -->
+    <div class="page" id="page-scorecard">
+      <div class="round-sel" id="round-sel"></div>
+      <div class="card" id="sc-area">
+        <div class="empty-state"><div class="empty-icon">📋</div><p>Set up players and rounds first</p></div>
+      </div>
+    </div>
+
+    <!-- ══════════ LEADERBOARD ══════════ -->
+    <div class="page" id="page-leaderboard">
+      <div class="sub-tabs">
+        <button class="s-tab active" onclick="showLbTab('stroke')">Stroke</button>
+        <button class="s-tab" onclick="showLbTab('net')">Net</button>
+        <button class="s-tab" onclick="showLbTab('stab')">Stableford</button>
+        <button class="s-tab" onclick="showLbTab('skins')">Skins</button>
+      </div>
+      <div id="lb-stroke">
+        <div class="card"><div class="card-title">🏆 Stroke Play <span class="pill">Gross</span></div><div id="lb-stroke-list"></div></div>
+      </div>
+      <div id="lb-net" style="display:none;">
+        <div class="card"><div class="card-title">📊 Net Scores <span class="pill">HDCP Adj.</span></div><div id="lb-net-list"></div></div>
+      </div>
+      <div id="lb-stab" style="display:none;">
+        <div class="card"><div class="card-title">⭐ Stableford</div><div id="lb-stab-list"></div></div>
+        <div class="card" style="background:rgba(26,74,46,0.05);border:1px solid rgba(26,74,46,0.1);">
+          <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.1;">Eagle: 4pts · Birdie: 3pts · Par: 2pts<br>Bogey: 1pt · Double+: 0pts</div>
+        </div>
+      </div>
+      <div id="lb-skins" style="display:none;">
+        <div class="card"><div class="card-title">💰 Skins by Hole</div><div id="lb-skins-list"></div></div>
+        <div class="card"><div class="card-title">Money Summary</div><div id="skins-summary"></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════ TEAMS ══════════ -->
+    <div class="page" id="page-teams">
+      <div id="team-matchups"></div>
+      <div class="card"><div class="card-title">🏅 Weekend Record</div><div id="weekend-record"></div></div>
+    </div>
+
+    <!-- ══════════ GOLFER PROFILES ══════════ -->
+    <div class="page" id="page-profiles">
+      <div class="profile-hero">
+        <div class="profile-select" id="profile-select"></div>
+        <div id="profile-display"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 Career Stats</div>
+        <div id="profile-career"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏅 Achievements</div>
+        <div class="achiev-grid" id="profile-achievements"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 Player Notes</div>
+        <textarea id="profile-notes" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;min-height:70px;outline:none;resize:none;color:var(--text);" placeholder="Bio, rivalries, famous moments, handicap history..."></textarea>
+        <button onclick="savePlayerNotes()" style="margin-top:8px;padding:8px 18px;background:var(--green);color:var(--gold);border:none;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;">Save Notes</button>
+      </div>
+    </div>
+
+    <!-- ══════════ ITINERARY ══════════ -->
+    <div class="page" id="page-itinerary">
+      <div id="itinerary-content"></div>
+    </div>
+
+    <!-- ══════════ LEAGUE HISTORY ══════════ -->
+    <div class="page" id="page-history">
+
+      <div class="history-trophy">
+        <div class="ht-icon">🏆</div>
+        <div class="ht-title">Skyline Cup History</div>
+        <div class="ht-sub">All-Time League Records</div>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="kpi-grid" id="kpi-grid"></div>
+
+      <!-- Records -->
+      <div class="card">
+        <div class="card-title">🏅 All-Time Records</div>
+        <div id="records-list"></div>
+      </div>
+
+      <!-- Cup wins by team -->
+      <div class="card">
+        <div class="card-title">🏆 Cup Winners</div>
+        <div id="cup-winners"></div>
+      </div>
+
+      <!-- Year by year -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px;">
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream);">Year by Year</div>
+      </div>
+      <button class="add-yr-btn" onclick="addHistoryYear()">+ Add Year</button>
+      <div id="history-years"></div>
+
+      <div style="text-align:center;font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:2px;padding:8px 0 4px;">🌶️ &nbsp; SKYLINE CUP · SINCE 2019 &nbsp; 🌶️</div>
+    </div>
+
+  </div><!-- /content -->
+  <div class="footer">The Skyline Cup · May 22–26, 2025 · Cincinnati's Finest 🏆</div>
+</div>
+
+<script>
+// ══════════════════════════════
+//  STATE
+// ══════════════════════════════
+let S = {
+  players: [
+    { name:'Player 1', handicap:10, team:'east', notes:'' },
+    { name:'Player 2', handicap:15, team:'east', notes:'' },
+    { name:'Player 3', handicap:8,  team:'west', notes:'' },
+    { name:'Player 4', handicap:20, team:'west', notes:'' },
+  ],
+  rounds: [
+    { name:'Round 1', course:'Course 1', par:Array(18).fill(4) },
+    { name:'Round 2', course:'Course 2', par:Array(18).fill(4) },
+  ],
+  scores: {},       // [ri][pi][hole]
+  currentRound: 0,
+  currentProfile: 0,
+  skinValue: 5,
+  carryover: true,
+  history: [
+    { year:2024, location:'Myrtle Beach, SC', champion:'Team East', mvp:'Player 1', eastWins:2, westWins:1, ties:0, lowGross:78, lowGrossPlayer:'Player 1', lowNet:68, lowNetPlayer:'Player 2', mostSkins:4, mostSkinsPlayer:'Player 1', highStab:38, highStabPlayer:'Player 3', eagles:1, birdies:14, notes:"Inaugural year. Player 2 famously 4-putted 18." },
+    { year:2023, location:'Pinehurst, NC', champion:'Team West', mvp:'Player 4', eastWins:1, westWins:2, ties:0, lowGross:81, lowGrossPlayer:'Player 3', lowNet:70, lowNetPlayer:'Player 4', mostSkins:5, mostSkinsPlayer:'Player 4', highStab:35, highStabPlayer:'Player 4', eagles:0, birdies:11, notes:"West dominates. Cup leaves East for first time." },
+    { year:2022, location:'Scottsdale, AZ', champion:'Team East', mvp:'Player 2', eastWins:3, westWins:0, ties:0, lowGross:79, lowGrossPlayer:'Player 2', lowNet:67, lowNetPlayer:'Player 2', mostSkins:6, mostSkinsPlayer:'Player 2', highStab:40, highStabPlayer:'Player 2', eagles:2, birdies:18, notes:"Player 2 sweeps every category. Legendary." },
+    { year:2021, location:'Bandon Dunes, OR', champion:'Team West', mvp:'Player 3', eastWins:1, westWins:2, ties:1, lowGross:83, lowGrossPlayer:'Player 3', lowNet:72, lowNetPlayer:'Player 1', mostSkins:3, mostSkinsPlayer:'Player 3', highStab:32, highStabPlayer:'Player 3', eagles:0, birdies:9, notes:"Coastal wind ruined everyone's scorecard." },
+    { year:2020, location:'TPC Sawgrass, FL', champion:'Team East', mvp:'Player 1', eastWins:2, westWins:1, ties:0, lowGross:80, lowGrossPlayer:'Player 1', lowNet:69, lowNetPlayer:'Player 1', mostSkins:5, mostSkinsPlayer:'Player 1', highStab:36, highStabPlayer:'Player 1', eagles:1, birdies:13, notes:"Island hole claimed 4 balls total." },
+    { year:2019, location:'Augusta, GA', champion:'Team East', mvp:'Player 2', eastWins:2, westWins:1, ties:0, lowGross:82, lowGrossPlayer:'Player 2', lowNet:71, lowNetPlayer:'Player 2', mostSkins:4, mostSkinsPlayer:'Player 2', highStab:33, highStabPlayer:'Player 2', eagles:0, birdies:10, notes:"The first Skyline Cup. Skins on a handshake." },
+  ],
+  itinerary: [
+    { day:'Thursday', date:'May 22', events:[
+      { time:'12pm', text:'<strong>Arrive & Check In</strong><br><span>Hotel / rental house</span>', golf:false },
+      { time:'3pm',  text:'<strong>Practice Round</strong><br><span>Driving range & putting green</span>', golf:true },
+      { time:'7pm',  text:'<strong>Welcome Dinner</strong><br><span>TBD Restaurant</span>', golf:false },
+    ], course:null },
+    { day:'Friday', date:'May 23', events:[
+      { time:'8am',  text:'<strong>Breakfast</strong>', golf:false },
+      { time:'10am', text:'<strong>Round 1 — Skyline Cup Begins</strong><br><span>Course 1 · Add details in Setup</span>', golf:true },
+      { time:'3pm',  text:'<strong>19th Hole</strong><br><span>Post-round drinks · First scores tallied</span>', golf:false },
+      { time:'7pm',  text:'<strong>Dinner + Skins Settlement</strong><br><span>TBD</span>', golf:false },
+    ], course:{ name:'Course 1 (Placeholder)', par:72, yards:'6,800', rating:'72.5', slope:'133', holes:18 } },
+    { day:'Saturday', date:'May 24', events:[
+      { time:'8am',  text:'<strong>Breakfast</strong>', golf:false },
+      { time:'10am', text:'<strong>Round 2 — Cup on the Line</strong><br><span>Course 2 · Add details in Setup</span>', golf:true },
+      { time:'3pm',  text:'<strong>19th Hole</strong><br><span>Post-round drinks & recap</span>', golf:false },
+      { time:'7pm',  text:'<strong>Championship Dinner 🏆</strong><br><span>Skyline Cup ceremony · side bets settled</span>', golf:false },
+    ], course:{ name:'Course 2 (Placeholder)', par:72, yards:'7,100', rating:'73.8', slope:'137', holes:18 } },
+    { day:'Sunday', date:'May 25', events:[
+      { time:'9am',  text:'<strong>Brunch + Final Tally</strong>', golf:false },
+      { time:'11am', text:'<strong>Bonus Round (optional)</strong><br><span>Course 3 / replay</span>', golf:true },
+      { time:'3pm',  text:'<strong>Depart · Cup Holder Drives Home in Glory</strong>', golf:false },
+    ], course:null },
+    { day:'Monday', date:'May 26', events:[
+      { time:'10am', text:'<strong>Final Breakfast</strong>', golf:false },
+      { time:'12pm', text:'<strong>Depart / Travel Day</strong>', golf:false },
+    ], course:null },
+  ]
+};
+
+try { const sv=localStorage.getItem('skylineCupV3'); if(sv){ const p=JSON.parse(sv); S={...S,...p}; } } catch(e){}
+function save(){ try{ localStorage.setItem('skylineCupV3',JSON.stringify(S)); }catch(e){} }
+
+// ══════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  if(p==='home')       renderHome();
+  if(p==='scorecard')  renderScorecard();
+  if(p==='leaderboard')renderLeaderboard();
+  if(p==='teams')      renderTeams();
+  if(p==='profiles')   renderProfiles();
+  if(p==='itinerary')  renderItinerary();
+  if(p==='history')    renderHistory();
+}
+
+// ══════════════════════════════
+//  HOME
+// ══════════════════════════════
+function renderHome(){
+  const ep=S.players.filter(p=>p.team==='east');
+  const wp=S.players.filter(p=>p.team==='west');
+  document.getElementById('east-names').textContent=ep.map(p=>p.name.split(' ')[0]).join(' & ')||'—';
+  document.getElementById('west-names').textContent=wp.map(p=>p.name.split(' ')[0]).join(' & ')||'—';
+
+  const ts=(team,ri)=>S.players.reduce((a,p,pi)=>{
+    if(p.team!==team)return a;
+    return a+(S.scores[ri]?.[pi]?.reduce((x,v)=>x+(parseInt(v)||0),0)||0);
+  },0);
+
+  let ew=0,ww=0;
+  S.rounds.forEach((_,ri)=>{ const e=ts('east',ri),w=ts('west',ri); if(e>0&&w>0){ if(e<w)ew++; else if(w<e)ww++; } });
+
+  document.getElementById('home-team-score').textContent=`${ew} · ${ww}`;
+  const st = ew>ww?'🌅 East Leads':ww>ew?'🌄 West Leads':ew===0&&ww===0?'No scores yet':'🤝 All Square';
+  document.getElementById('home-match-status').textContent=st;
+
+  // Individual standings
+  const totals=getPlayerTotals().filter(t=>t.gross>0).sort((a,b)=>a.gross-b.gross);
+  if(!totals.length){
+    document.getElementById('home-standings').innerHTML='<div class="empty-state"><div class="empty-icon">⛳</div><p style="font-size:14px;">Enter scores to see standings</p></div>';
+  } else {
+    const parT=S.rounds.reduce((a,r)=>a+r.par.reduce((x,y)=>x+y,0),0);
+    document.getElementById('home-standings').innerHTML=totals.map((t,i)=>{
+      const diff=t.gross-parT;
+      const ds=diff>0?`+${diff}`:diff===0?'E':''+diff;
+      return `<div class="standing-row">
+        <div class="st-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+        <div class="st-avatar ${t.player.team==='east'?'av-east':'av-west'}">${t.player.name[0]}</div>
+        <div class="st-info"><div class="st-name">${t.player.name}</div><div class="st-detail">${t.player.team.toUpperCase()} · HDCP ${t.player.handicap}</div></div>
+        <div class="st-score ${diff<0?'col-red':diff>0?'col-green':''}">${t.gross}<br><small style="font-size:10px;">${ds}</small></div>
+      </div>`;
+    }).join('');
+  }
+
+  // Skins pot
+  const {skinWins}=calcSkins();
+  const hasAnySkins=Object.values(skinWins).some(v=>v>0);
+  if(!hasAnySkins){
+    document.getElementById('home-skins').innerHTML='<div class="empty-state" style="padding:12px 0 4px;"><p style="font-size:13px;">No skins claimed yet</p></div>';
+  } else {
+    document.getElementById('home-skins').innerHTML=S.players.map((p,pi)=>`
+      <div class="wk-stat">
+        <div class="wk-label"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.team==='east'?'var(--gold)':'var(--blue)'};margin-right:7px;vertical-align:middle;"></span>${p.name}</div>
+        <div class="wk-val">$${skinWins[pi]*S.skinValue} <small style="color:var(--muted);font-size:10px;">(${skinWins[pi]} skin${skinWins[pi]!==1?'s':''})</small></div>
+      </div>`).join('');
+  }
+}
+
+// ══════════════════════════════
+//  SETUP
+// ══════════════════════════════
+function renderSetup(){
+  document.getElementById('players-list').innerHTML=S.players.map((p,i)=>`
+    <div class="player-row">
+      <div class="p-avatar ${p.team==='east'?'av-east':'av-west'}">${(p.name[0]||'?').toUpperCase()}</div>
+      <div class="p-info">
+        <input class="p-name-in" type="text" value="${p.name}" placeholder="Player ${i+1}"
+          oninput="S.players[${i}].name=this.value;renderSetup()">
+        <div class="p-sub">
+          <label>HDCP</label>
+          <input class="hdcp-in" type="number" value="${p.handicap}" min="0" max="54" step="0.1"
+            oninput="S.players[${i}].handicap=parseFloat(this.value)||0">
+          <span style="flex:1"></span>
+          <button class="team-tog ${p.team==='east'?'badge-east':'badge-west'}" onclick="toggleTeam(${i})">
+            ${p.team==='east'?'🌅 East':'🌄 West'}
+          </button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('rounds-list').innerHTML=S.rounds.map((r,i)=>`
+    <div style="padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;gap:10px;align-items:center;">
+      <div style="flex:1;">
+        <input type="text" value="${r.name}" placeholder="Round name"
+          style="width:100%;border:none;background:none;font-size:14px;font-weight:600;color:var(--text);outline:none;font-family:'DM Sans',sans-serif;"
+          oninput="S.rounds[${i}].name=this.value">
+        <input type="text" value="${r.course}" placeholder="Course name"
+          style="width:100%;border:none;background:none;font-size:11px;color:var(--muted);outline:none;font-family:'DM Mono',monospace;margin-top:2px;"
+          oninput="S.rounds[${i}].course=this.value">
+      </div>
+      ${S.rounds.length>1?`<button onclick="removeRound(${i})" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);">✕</button>`:''}
+    </div>`).join('');
+}
+
+function toggleTeam(i){ S.players[i].team=S.players[i].team==='east'?'west':'east'; renderSetup(); }
+function addRound(){ S.rounds.push({name:`Round ${S.rounds.length+1}`,course:'',par:Array(18).fill(4)}); renderSetup(); }
+function removeRound(i){ S.rounds.splice(i,1); renderSetup(); }
+function saveSetup(){
+  S.skinValue=parseInt(document.getElementById('skinValue').value)||5;
+  S.carryover=document.getElementById('carryCheck').checked;
+  save(); showPage('scorecard');
+}
+
+// ══════════════════════════════
+//  SCORECARD
+// ══════════════════════════════
+function renderScorecard(){
+  document.getElementById('round-sel').innerHTML=S.rounds.map((r,i)=>`
+    <button class="r-btn ${i===S.currentRound?'active':''}" onclick="selectRound(${i})">${r.name}</button>`).join('');
+
+  const ri=S.currentRound;
+  if(!S.scores[ri]) S.scores[ri]={};
+  S.players.forEach((_,pi)=>{ if(!S.scores[ri][pi]) S.scores[ri][pi]=Array(18).fill(''); });
+
+  const r=S.rounds[ri];
+  let h=`<div class="card-title">📋 ${r.name} — ${r.course||'TBD'}</div><div style="overflow-x:auto;"><table class="sc-table"><thead><tr><th>HOLE</th>${S.players.map(p=>`<th>${(p.name.split(' ')[0]||'?').substring(0,5)}</th>`).join('')}</tr></thead><tbody>`;
+  for(let g=0;g<2;g++){
+    const s=g*9,e=s+9;
+    h+=`<tr class="par-row"><td>${g===0?'FRONT':'BACK'}</td>${S.players.map(()=>'<td></td>').join('')}</tr>`;
+    for(let hole=s;hole<e;hole++){
+      h+=`<tr><td>${hole+1}<br><small style="font-size:8px;color:var(--muted)">P${r.par[hole]}</small></td>`;
+      h+=S.players.map((_,pi)=>`<td><input class="sc-in" type="number" min="1" max="15" value="${S.scores[ri][pi][hole]||''}" id="sc-${ri}-${pi}-${hole}" oninput="updateScore(${ri},${pi},${hole},this.value)" onfocus="this.select()"></td>`).join('');
+      h+='</tr>';
+    }
+    h+=`<tr class="tot-row"><td>${g===0?'OUT':'IN'}</td>${S.players.map((_,pi)=>{
+      const sub=S.scores[ri][pi].slice(s,e).reduce((a,v)=>a+(parseInt(v)||0),0);
+      return `<td id="sub-${g}-${pi}">${sub||''}</td>`;
+    }).join('')}</tr>`;
+  }
+  const parT=r.par.reduce((a,v)=>a+v,0);
+  h+=`<tr class="tot-row" style="background:rgba(26,74,46,0.18);"><td>TOT</td>${S.players.map((_,pi)=>{
+    const tot=S.scores[ri][pi].reduce((a,v)=>a+(parseInt(v)||0),0);
+    const diff=tot-parT;
+    const ds=tot?(diff>0?`+${diff}`:diff===0?'E':diff):'';
+    return `<td id="tot-${pi}" style="font-size:14px;">${tot?`${tot}<br><small style="font-size:9px;color:${diff<0?'var(--red)':'var(--muted)'}">${ds}</small>`:''}`;
+  }).join('')}</tr></tbody></table></div>`;
+
+  document.getElementById('sc-area').innerHTML=h;
+  colorAllCells(ri);
+}
+
+function selectRound(i){ S.currentRound=i; renderScorecard(); }
+
+function updateScore(ri,pi,hole,val){
+  if(!S.scores[ri]) S.scores[ri]={};
+  if(!S.scores[ri][pi]) S.scores[ri][pi]=Array(18).fill('');
+  S.scores[ri][pi][hole]=val; save();
+  colorCell(ri,pi,hole); updateTotals(ri);
+}
+
+function colorCell(ri,pi,h){
+  const el=document.getElementById(`sc-${ri}-${pi}-${h}`); if(!el) return;
+  const v=parseInt(el.value), par=S.rounds[ri].par[h];
+  el.className='sc-in';
+  if(!v) return;
+  if(v<=par-2) el.classList.add('eagle');
+  else if(v===par-1) el.classList.add('birdie');
+  else if(v===par) el.classList.add('par-s');
+  else if(v===par+1) el.classList.add('bogey');
+  else if(v===par+2) el.classList.add('dbl');
+  else el.classList.add('trip');
+}
+function colorAllCells(ri){ S.players.forEach((_,pi)=>{ for(let h=0;h<18;h++) colorCell(ri,pi,h); }); }
+function updateTotals(ri){
+  S.players.forEach((_,pi)=>{
+    const sc=S.scores[ri]?.[pi]||[];
+    const f=sc.slice(0,9).reduce((a,v)=>a+(parseInt(v)||0),0);
+    const b=sc.slice(9).reduce((a,v)=>a+(parseInt(v)||0),0);
+    const tot=f+b;
+    const sf=document.getElementById(`sub-0-${pi}`), sb=document.getElementById(`sub-1-${pi}`), te=document.getElementById(`tot-${pi}`);
+    if(sf) sf.textContent=f||'';
+    if(sb) sb.textContent=b||'';
+    const parT=S.rounds[ri].par.reduce((a,v)=>a+v,0), diff=tot-parT;
+    const ds=tot?(diff>0?`+${diff}`:diff===0?'E':diff):'';
+    if(te) te.innerHTML=tot?`${tot}<br><small style="font-size:9px;color:${diff<0?'var(--red)':'var(--muted)'}">${ds}</small>`:'';
+  });
+}
+
+// ══════════════════════════════
+//  HELPERS
+// ══════════════════════════════
+function getPlayerTotals(){
+  return S.players.map((p,pi)=>{
+    let gross=0, stab=0;
+    S.rounds.forEach((r,ri)=>{
+      const sc=S.scores[ri]?.[pi]||[];
+      gross+=sc.reduce((a,v)=>a+(parseInt(v)||0),0);
+      sc.forEach((v,h)=>{ const val=parseInt(v); if(!val) return; const d=val-r.par[h]; if(d<=-2)stab+=4; else if(d===-1)stab+=3; else if(d===0)stab+=2; else if(d===1)stab+=1; });
+    });
+    const net=gross>0?gross-Math.round(p.handicap):0;
+    return {player:p, pi, gross, net, stab};
+  });
+}
+
+function calcSkins(){
+  const skinWins={};
+  S.players.forEach((_,i)=>skinWins[i]=0);
+  let skinRows=[], carry=0;
+  S.rounds.forEach((r,ri)=>{
+    for(let h=0;h<18;h++){
+      const hs=S.players.map((p,pi)=>({pi,v:parseInt(S.scores[ri]?.[pi]?.[h])||null})).filter(x=>x.v!==null);
+      if(hs.length<2){ skinRows.push({ri,h,winner:null,pot:0,tied:false,noScore:true}); continue; }
+      const mn=Math.min(...hs.map(x=>x.v));
+      const winners=hs.filter(x=>x.v===mn);
+      const pot=1+carry;
+      if(winners.length===1){ skinWins[winners[0].pi]+=pot; skinRows.push({ri,h,winner:winners[0].pi,score:mn,pot,tied:false}); carry=0; }
+      else if(S.carryover){ carry++; skinRows.push({ri,h,winner:null,pot,tied:true}); }
+      else { skinRows.push({ri,h,winner:null,pot:0,tied:true}); }
+    }
+  });
+  return {skinWins, skinRows};
+}
+
+// ══════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════
+function showLbTab(tab){
+  ['stroke','net','stab','skins'].forEach(t=>{ document.getElementById('lb-'+t).style.display='none'; });
+  document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('lb-'+tab).style.display='block';
+  document.querySelectorAll('.s-tab')[['stroke','net','stab','skins'].indexOf(tab)].classList.add('active');
+}
+
+function renderLeaderboard(){
+  const totals=getPlayerTotals();
+  const hasScores=totals.some(t=>t.gross>0);
+  const empty='<div class="empty-state"><div class="empty-icon">🌿</div><p>Enter scores to see standings</p></div>';
+  const avCls=p=>p.team==='east'?'av-east':'av-west';
+  const parT=S.rounds.reduce((a,r)=>a+r.par.reduce((x,y)=>x+y,0),0);
+
+  if(!hasScores){ ['lb-stroke-list','lb-net-list','lb-stab-list','lb-skins-list'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=empty;}); return; }
+
+  // Stroke
+  const ss=[...totals].filter(t=>t.gross>0).sort((a,b)=>a.gross-b.gross);
+  document.getElementById('lb-stroke-list').innerHTML=ss.map((t,i)=>{
+    const d=t.gross-parT, ds=d>0?`+${d}`:d===0?'E':''+d;
+    return `<div class="lb-item">
+      <div class="lb-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+      <div class="st-avatar ${avCls(t.player)}" style="width:34px;height:34px;font-size:13px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-sub">${t.player.team.toUpperCase()} · HDCP ${t.player.handicap}</div></div>
+      <div class="lb-val ${d<0?'col-red':d>0?'col-green':''}">${t.gross}<br><small style="font-size:10px;">${ds}</small></div>
+    </div>`;
+  }).join('');
+
+  // Net
+  const ns=[...totals].filter(t=>t.net>0).sort((a,b)=>a.net-b.net);
+  document.getElementById('lb-net-list').innerHTML=ns.map((t,i)=>`
+    <div class="lb-item">
+      <div class="lb-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+      <div class="st-avatar ${avCls(t.player)}" style="width:34px;height:34px;font-size:13px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-sub">Gross: ${t.gross} · HDCP: ${t.player.handicap}</div></div>
+      <div class="lb-val">${t.net}</div>
+    </div>`).join('');
+
+  // Stableford
+  const stbs=[...totals].filter(t=>t.gross>0).sort((a,b)=>b.stab-a.stab);
+  document.getElementById('lb-stab-list').innerHTML=stbs.map((t,i)=>`
+    <div class="stab-row">
+      <div class="lb-rank ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+      <div class="st-avatar ${avCls(t.player)}" style="width:34px;height:34px;font-size:13px;flex-shrink:0;">${t.player.name[0]}</div>
+      <div class="lb-info"><div class="lb-name">${t.player.name}</div><div class="lb-sub">${t.player.team.toUpperCase()}</div></div>
+      <div><div class="stab-pts">${t.stab}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);">pts</div></div>
+    </div>`).join('');
+
+  // Skins
+  const {skinWins, skinRows}=calcSkins();
+  document.getElementById('lb-skins-list').innerHTML=skinRows.filter(r=>!r.noScore).map(r=>{
+    if(r.tied) return `<div class="skins-hole"><div class="sh-num">R${r.ri+1}·H${r.h+1}</div><div class="sh-winner"><span class="sh-carry">Tied — carries</span></div></div>`;
+    if(r.winner===null&&!r.tied) return `<div class="skins-hole"><div class="sh-num">R${r.ri+1}·H${r.h+1}</div><div class="sh-winner" style="color:var(--muted)">Tied</div></div>`;
+    return `<div class="skins-hole"><div class="sh-num">R${r.ri+1}·H${r.h+1}</div><div class="sh-winner">${S.players[r.winner].name} <small style="color:var(--muted)">(${r.score})</small></div><div class="sh-val">$${r.pot*S.skinValue}</div></div>`;
+  }).join('')||empty;
+
+  document.getElementById('skins-summary').innerHTML=S.players.map((p,pi)=>`
+    <div class="wk-stat">
+      <div class="wk-label"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.team==='east'?'var(--gold)':'var(--blue)'};margin-right:7px;vertical-align:middle;"></span>${p.name}</div>
+      <div class="wk-val">$${skinWins[pi]*S.skinValue} <small style="font-size:10px;color:var(--muted)">(${skinWins[pi]} skins)</small></div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════
+//  TEAMS
+// ══════════════════════════════
+function renderTeams(){
+  const ep=S.players.filter(p=>p.team==='east');
+  const wp=S.players.filter(p=>p.team==='west');
+  const ts=(team,ri)=>S.players.reduce((a,p,pi)=>{ if(p.team!==team)return a; return a+(S.scores[ri]?.[pi]?.reduce((x,v)=>x+(parseInt(v)||0),0)||0); },0);
+  let ew=0,ww=0,ties=0;
+
+  document.getElementById('team-matchups').innerHTML=S.rounds.map((r,ri)=>{
+    const es=ts('east',ri), ws=ts('west',ri);
+    let st='No scores yet';
+    if(es>0&&ws>0){ if(es<ws){ew++;st='🌅 East Wins';} else if(ws<es){ww++;st='🌄 West Wins';} else{ties++;st='🤝 All Square';} }
+    return `<div class="match-card">
+      <div class="mc-label">${r.name} · ${r.course||'TBD'}</div>
+      <div class="mc-teams">
+        <div class="mc-team"><div class="mc-tname" style="color:var(--gold-light);">East</div><div class="mc-players">${ep.map(p=>p.name.split(' ')[0]).join(' & ')}</div></div>
+        <div class="mc-score">${es||'—'} <span style="font-size:16px;opacity:0.35">v</span> ${ws||'—'}</div>
+        <div class="mc-team"><div class="mc-tname" style="color:#7ab3d4;">West</div><div class="mc-players">${wp.map(p=>p.name.split(' ')[0]).join(' & ')}</div></div>
+      </div>
+      <div class="mc-status"><span class="mc-pill">${st}</span></div>
+    </div>`;
+  }).join('');
+
+  const leader=ew>ww?'🌅 East leads':ww>ew?'🌄 West leads':'🤝 All square';
+  document.getElementById('weekend-record').innerHTML=`
+    <div class="wk-stat"><div class="wk-label">🌅 Team East</div><div class="wk-val" style="color:var(--gold);">${ew} Win${ew!==1?'s':''}</div></div>
+    <div class="wk-stat"><div class="wk-label">🌄 Team West</div><div class="wk-val" style="color:var(--blue);">${ww} Win${ww!==1?'s':''}</div></div>
+    <div class="wk-stat"><div class="wk-label">Ties</div><div class="wk-val">${ties}</div></div>
+    <div class="wk-stat" style="border-top:2px solid rgba(0,0,0,0.08);margin-top:4px;padding-top:12px;"><div class="wk-label">Standing</div><div class="wk-val">${leader}</div></div>`;
+}
+
+// ══════════════════════════════
+//  GOLFER PROFILES
+// ══════════════════════════════
+function renderProfiles(){
+  const i=S.currentProfile;
+  // Player selector buttons
+  document.getElementById('profile-select').innerHTML=S.players.map((p,pi)=>`
+    <button class="prof-btn ${pi===i?'active':''}" onclick="selectProfile(${pi})">${p.name.split(' ')[0]||'P'+(pi+1)}</button>`).join('');
+
+  const p=S.players[i];
+  const avCls=p.team==='east'?'av-east':'av-west';
+
+  // Stats from this event's scores
+  let totalGross=0, totalRounds=0, totalBirdies=0, totalEagles=0, totalPars=0, totalBogeys=0, bestRound=999, worstRound=0;
+  S.rounds.forEach((r,ri)=>{
+    const sc=S.scores[ri]?.[i]||[];
+    const rnd=sc.reduce((a,v)=>a+(parseInt(v)||0),0);
+    if(rnd>0){ totalGross+=rnd; totalRounds++; if(rnd<bestRound)bestRound=rnd; if(rnd>worstRound)worstRound=rnd; }
+    sc.forEach((v,h)=>{ const val=parseInt(v); if(!val)return; const d=val-r.par[h]; if(d<=-2)totalEagles++; else if(d===-1)totalBirdies++; else if(d===0)totalPars++; else if(d===1)totalBogeys++; });
+  });
+  const avg=totalRounds>0?(totalGross/totalRounds).toFixed(1):'—';
+
+  // Career stats from history (match by name)
+  const histRounds=S.history.filter(y=>y.lowGrossPlayer===p.name||y.mvp===p.name||y.mostSkinsPlayer===p.name||y.highStabPlayer===p.name);
+  const mvpCount=S.history.filter(y=>y.mvp===p.name).length;
+  const skinsWonYears=S.history.filter(y=>y.mostSkinsPlayer===p.name).length;
+  const lowGrossEver=S.history.filter(y=>y.lowGrossPlayer===p.name).reduce((b,y)=>y.lowGross<b?y.lowGross:b, 999);
+  const lowNetEver=S.history.filter(y=>y.lowNetPlayer===p.name).reduce((b,y)=>y.lowNet<b?y.lowNet:b, 999);
+
+  document.getElementById('profile-display').innerHTML=`
+    <div class="prof-main">
+      <div class="prof-avatar-lg ${avCls}">${(p.name[0]||'?').toUpperCase()}</div>
+      <div class="prof-title">
+        <div class="prof-name">${p.name}</div>
+        <div class="prof-team">${p.team==='east'?'🌅 Team East':'🌄 Team West'}</div>
+        <div class="prof-hdcp">Handicap: ${p.handicap}</div>
+      </div>
+    </div>
+    <div class="prof-stats-grid">
+      <div class="ps-box"><div class="ps-val">${totalRounds>0?bestRound:'—'}</div><div class="ps-label">Best Round</div></div>
+      <div class="ps-box"><div class="ps-val">${avg}</div><div class="ps-label">Avg Score</div></div>
+      <div class="ps-box"><div class="ps-val">${totalBirdies}</div><div class="ps-label">Birdies</div></div>
+      <div class="ps-box"><div class="ps-val">${totalEagles}</div><div class="ps-label">Eagles</div></div>
+      <div class="ps-box"><div class="ps-val">${totalPars}</div><div class="ps-label">Pars</div></div>
+      <div class="ps-box"><div class="ps-val">${totalBogeys}</div><div class="ps-label">Bogeys</div></div>
+    </div>`;
+
+  document.getElementById('profile-career').innerHTML=`
+    <div class="pc-row"><span class="pc-label">Cups Played</span><span class="pc-val">${histRounds.length > 0 ? S.history.length : '—'}</span></div>
+    <div class="pc-row"><span class="pc-label">🌟 MVP Awards</span><span class="pc-val">${mvpCount || '—'}</span></div>
+    <div class="pc-row"><span class="pc-label">Career Low Gross</span><span class="pc-val">${lowGrossEver<999?lowGrossEver:'—'}</span></div>
+    <div class="pc-row"><span class="pc-label">Career Low Net</span><span class="pc-val">${lowNetEver<999?lowNetEver:'—'}</span></div>
+    <div class="pc-row"><span class="pc-label">Skins Titles</span><span class="pc-val">${skinsWonYears>0?skinsWonYears:'—'}</span></div>
+    <div class="pc-row"><span class="pc-label">Current Handicap</span><span class="pc-val">${p.handicap}</span></div>`;
+
+  document.getElementById('profile-achievements').innerHTML=[
+    { icon:'🏆', label:'Cup Wins', val: S.history.filter(y=>y.champion && y.champion.toLowerCase().includes(p.team)).length || '0' },
+    { icon:'🌟', label:'MVP Awards', val: mvpCount||'0' },
+    { icon:'🦅', label:'Eagles (Event)', val: totalEagles||'0' },
+    { icon:'🐦', label:'Birdies (Event)', val: totalBirdies||'0' },
+    { icon:'💰', label:'Skins Titles', val: skinsWonYears||'0' },
+    { icon:'⭐', label:'Stab Titles', val: S.history.filter(y=>y.highStabPlayer===p.name).length||'0' },
+  ].map(a=>`<div class="achiev-item"><div class="achiev-icon">${a.icon}</div><div class="achiev-label">${a.label}</div><div class="achiev-val">${a.val}</div></div>`).join('');
+
+  // Notes
+  document.getElementById('profile-notes').value=p.notes||'';
+}
+
+function selectProfile(i){ S.currentProfile=i; renderProfiles(); }
+function savePlayerNotes(){
+  S.players[S.currentProfile].notes=document.getElementById('profile-notes').value;
+  save();
+  const btn=document.querySelector('#page-profiles button[onclick="savePlayerNotes()"]');
+  if(btn){ btn.textContent='Saved ✓'; setTimeout(()=>btn.textContent='Save Notes',1500); }
+}
+
+// ══════════════════════════════
+//  ITINERARY
+// ══════════════════════════════
+function renderItinerary(){
+  document.getElementById('itinerary-content').innerHTML=S.itinerary.map((day,di)=>`
+    <div class="card">
+      <div class="day-hd">
+        <div class="day-circle">${di+1}</div>
+        <div><div class="day-date">${day.date}</div><div class="day-name">${day.day}</div></div>
+      </div>
+      ${day.events.map(ev=>`
+        <div class="it-event ${ev.golf?'golf':''}">
+          <div class="it-time">${ev.time}</div>
+          <div class="it-text">${ev.text}</div>
+        </div>`).join('')}
+      ${day.course?`<div class="course-box">
+        <div style="font-family:'Playfair Display',serif;font-weight:700;color:var(--green);font-size:15px;margin-bottom:6px;">⛳ ${day.course.name}</div>
+        ${['holes','par','yards','rating','slope'].map(k=>`<div class="cs"><span class="cs-label">${k.toUpperCase()}</span><span class="cs-val">${day.course[k]}</span></div>`).join('')}
+      </div>`:''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════
+//  LEAGUE HISTORY
+// ══════════════════════════════
+function renderHistory(){
+  const h=S.history;
+  const totalYears=h.length;
+  const eastCups=h.filter(y=>y.champion==='Team East').length;
+  const westCups=h.filter(y=>y.champion==='Team West').length;
+  const totalEagles=h.reduce((a,y)=>a+(y.eagles||0),0);
+  const totalBirdies=h.reduce((a,y)=>a+(y.birdies||0),0);
+  const totalRounds=h.reduce((a,y)=>a+(y.eastWins+y.westWins+y.ties),0);
+
+  // MVP counts
+  const mvpCount={};
+  h.forEach(y=>{ if(y.mvp) mvpCount[y.mvp]=(mvpCount[y.mvp]||0)+1; });
+  const topMvp=Object.entries(mvpCount).sort((a,b)=>b[1]-a[1])[0];
+
+  // KPI grid
+  document.getElementById('kpi-grid').innerHTML=[
+    {val:totalYears, label:'Years Played'},
+    {val:`${eastCups}–${westCups}`, label:'East–West Cups'},
+    {val:totalEagles, label:'Total Eagles'},
+    {val:totalBirdies, label:'Total Birdies'},
+    {val:totalRounds, label:'Total Rounds'},
+    {val:topMvp?`${topMvp[0].split(' ')[0]} (${topMvp[1]}x)`:'—', label:'Top MVP'},
+  ].map(k=>`<div class="kpi-box"><div class="kpi-val">${k.val}</div><div class="kpi-label">${k.label}</div></div>`).join('');
+
+  // Records
+  if(h.length){
+    const lgEnt=h.reduce((b,y)=>y.lowGross<b.lowGross?y:b, h[0]);
+    const lnEnt=h.reduce((b,y)=>y.lowNet<b.lowNet?y:b, h[0]);
+    const skEnt=h.reduce((b,y)=>y.mostSkins>b.mostSkins?y:b, h[0]);
+    const stEnt=h.reduce((b,y)=>y.highStab>b.highStab?y:b, h[0]);
+    document.getElementById('records-list').innerHTML=[
+      {icon:'🦅', label:'Low Gross Round', holder:`${lgEnt.lowGrossPlayer} · ${lgEnt.year} · ${lgEnt.location}`, val:lgEnt.lowGross},
+      {icon:'📊', label:'Low Net Round', holder:`${lnEnt.lowNetPlayer} · ${lnEnt.year}`, val:lnEnt.lowNet},
+      {icon:'💰', label:'Most Skins (Year)', holder:`${skEnt.mostSkinsPlayer} · ${skEnt.year}`, val:skEnt.mostSkins},
+      {icon:'⭐', label:'High Stableford', holder:`${stEnt.highStabPlayer} · ${stEnt.year}`, val:`${stEnt.highStab} pts`},
+      {icon:'🌟', label:'Most MVP Awards', holder:topMvp?topMvp[0]:'—', val:topMvp?`${topMvp[1]}x`:'0'},
+    ].map(r=>`<div class="record-item"><div class="rec-icon">${r.icon}</div><div class="rec-info"><div class="rec-label">${r.label}</div><div class="rec-holder">${r.holder}</div></div><div class="rec-val">${r.val}</div></div>`).join('');
+  }
+
+  // Cup winners
+  const champTally={};
+  h.forEach(y=>{ if(y.champion) champTally[y.champion]=(champTally[y.champion]||0)+1; });
+  document.getElementById('cup-winners').innerHTML=h.slice().sort((a,b)=>b.year-a.year).map(y=>`
+    <div class="wk-stat">
+      <div class="wk-label">${y.year} · ${y.location||'TBD'}</div>
+      <div class="wk-val" style="color:${y.champion==='Team East'?'var(--gold)':'var(--blue)'};">${y.champion||'—'}</div>
+    </div>`).join('');
+
+  // Year by year
+  document.getElementById('history-years').innerHTML=h.map((y,yi)=>`
+    <div class="yr-card">
+      <div class="yr-hd" onclick="toggleYr(${yi})">
+        <div>
+          <div class="yr-title">🏆 ${y.year} · ${y.location||'TBD'}</div>
+          <div class="yr-champ">${y.champion||'?'} · MVP: ${y.mvp||'?'}</div>
+        </div>
+        <div class="yr-arrow" id="yra-${yi}">▼</div>
+      </div>
+      <div class="yr-body" id="yrb-${yi}">
+        <div class="yr-stat"><span class="yr-stat-k">📍 Location</span><input class="hist-in" value="${y.location||''}" oninput="S.history[${yi}].location=this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">🏆 Champion</span><input class="hist-in" value="${y.champion||''}" oninput="S.history[${yi}].champion=this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">🌟 MVP</span><input class="hist-in" value="${y.mvp||''}" oninput="S.history[${yi}].mvp=this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">🌅 East Wins</span><input class="hist-in" type="number" value="${y.eastWins||0}" oninput="S.history[${yi}].eastWins=+this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">🌄 West Wins</span><input class="hist-in" type="number" value="${y.westWins||0}" oninput="S.history[${yi}].westWins=+this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">Low Gross</span>
+          <span style="display:flex;gap:6px;justify-content:flex-end;">
+            <input class="hist-in" type="number" style="width:56px;" value="${y.lowGross||''}" oninput="S.history[${yi}].lowGross=+this.value;save()">
+            <input class="hist-in" style="width:90px;font-size:11px;" value="${y.lowGrossPlayer||''}" oninput="S.history[${yi}].lowGrossPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="yr-stat"><span class="yr-stat-k">Low Net</span>
+          <span style="display:flex;gap:6px;justify-content:flex-end;">
+            <input class="hist-in" type="number" style="width:56px;" value="${y.lowNet||''}" oninput="S.history[${yi}].lowNet=+this.value;save()">
+            <input class="hist-in" style="width:90px;font-size:11px;" value="${y.lowNetPlayer||''}" oninput="S.history[${yi}].lowNetPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="yr-stat"><span class="yr-stat-k">Most Skins</span>
+          <span style="display:flex;gap:6px;justify-content:flex-end;">
+            <input class="hist-in" type="number" style="width:46px;" value="${y.mostSkins||0}" oninput="S.history[${yi}].mostSkins=+this.value;save()">
+            <input class="hist-in" style="width:90px;font-size:11px;" value="${y.mostSkinsPlayer||''}" oninput="S.history[${yi}].mostSkinsPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="yr-stat"><span class="yr-stat-k">High Stableford</span>
+          <span style="display:flex;gap:6px;justify-content:flex-end;">
+            <input class="hist-in" type="number" style="width:46px;" value="${y.highStab||0}" oninput="S.history[${yi}].highStab=+this.value;save()"> pts
+            <input class="hist-in" style="width:90px;font-size:11px;" value="${y.highStabPlayer||''}" oninput="S.history[${yi}].highStabPlayer=this.value;save()" placeholder="Player">
+          </span>
+        </div>
+        <div class="yr-stat"><span class="yr-stat-k">🦅 Eagles</span><input class="hist-in" type="number" value="${y.eagles||0}" oninput="S.history[${yi}].eagles=+this.value;save()"></div>
+        <div class="yr-stat"><span class="yr-stat-k">🐦 Birdies</span><input class="hist-in" type="number" value="${y.birdies||0}" oninput="S.history[${yi}].birdies=+this.value;save()"></div>
+        <div class="yr-stat" style="flex-direction:column;gap:4px;">
+          <span class="yr-stat-k">📝 Notes</span>
+          <textarea style="width:100%;border:1px solid #ddd;border-radius:8px;padding:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;resize:none;min-height:50px;margin-top:4px;" oninput="S.history[${yi}].notes=this.value;save()" placeholder="Memorable moments...">${y.notes||''}</textarea>
+        </div>
+        <button onclick="removeYear(${yi})" style="margin-top:8px;padding:5px 14px;background:none;border:1px solid rgba(192,57,43,0.3);border-radius:8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--red);cursor:pointer;text-transform:uppercase;letter-spacing:1px;">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleYr(i){
+  const b=document.getElementById(`yrb-${i}`), a=document.getElementById(`yra-${i}`);
+  const open=b.classList.toggle('open'); a.classList.toggle('open',open);
+}
+function addHistoryYear(){
+  const yr=S.history.length>0?S.history[0].year+1:new Date().getFullYear();
+  S.history.unshift({year:yr,location:'',champion:'',mvp:'',eastWins:0,westWins:0,ties:0,lowGross:0,lowGrossPlayer:'',lowNet:0,lowNetPlayer:'',mostSkins:0,mostSkinsPlayer:'',highStab:0,highStabPlayer:'',eagles:0,birdies:0,notes:''});
+  save(); renderHistory();
+}
+function removeYear(i){ if(confirm('Remove this year from the record books?')){ S.history.splice(i,1); save(); renderHistory(); } }
+
+// ══════════════════════════════
+//  INIT
+// ══════════════════════════════
+renderSetup();
+renderHome();
+renderItinerary();
+</script>
+</body>
+</html>
